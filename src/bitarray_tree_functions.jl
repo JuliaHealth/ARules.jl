@@ -1,7 +1,7 @@
 using StatsBase
 
 
-type Node
+struct Node
     id::Int16
     item_ids::Array{Int16,1}
     transactions::BitArray{1}
@@ -10,28 +10,20 @@ type Node
     supp::Int
 
     function Node(id::Int16, item_ids::Array{Int16,1}, transactions::BitArray{1})
-        nd = new()
-        nd.id = id
-        nd.item_ids = item_ids
-        nd.transactions = transactions
-        nd.children = Array{Node,1}(0)
+        children = Array{Node,1}(0)
+        nd = new(id, item_ids, transactions, children)
         return nd 
     end
 
     function Node(id::Int16, item_ids::Array{Int16,1}, transactions::BitArray{1}, mother::Node, supp::Int)
-        nd = new()
-        nd.id = id
-        nd.item_ids = item_ids
-        nd.transactions = transactions
-        nd.children = Array{Node,1}(0)
-        nd.mother = mother
-        nd.supp = supp
+        children = Array{Node,1}(0)
+        nd = new(id, item_ids, transactions, children, mother, supp)
         return nd 
     end
 end
 
 
-type Rule 
+struct Rule 
     p::Array{Int16,1}
     q::Int16
     supp::Float64  
@@ -39,15 +31,15 @@ type Rule
     lift::Float64 
 
     function Rule(node::Node, mask::BitArray{1}, supp_dict::Dict{Array{Int16,1}, Int}, num_transacts::Int)
-
-        rule = new()
-        rule.p = node.item_ids[mask]
-        rule.supp = node.supp/num_transacts 
-        rule.conf = rule.supp/supp_dict[node.item_ids[mask]]
+        p = node.item_ids[mask]
+        supp = node.supp/num_transacts 
+        conf = supp/supp_dict[node.item_ids[mask]]
         unmask = !mask
         q_idx = findfirst(unmask)
-        rule.q = node.item_ids[q_idx]
-        rule.lift = rule.conf/supp_dict[node.item_ids[unmask]]
+        q = node.item_ids[q_idx]
+        lift = conf/supp_dict[node.item_ids[unmask]]
+
+        rule = new(p, q, supp, conf, lift)
         return rule 
     end
 end 
@@ -106,7 +98,7 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
     sibs = younger_siblings(nd)
 
     for j = 1:length(sibs)
-        transacts = nd.transactions & sibs[j].transactions
+        transacts = nd.transactions .& sibs[j].transactions
         supp = sum(transacts)
         
         if supp ≥ minsupp
@@ -189,9 +181,15 @@ itemset to be called "frequent", and the max depth of the tree, respectively
 function frequent(all_transacts::Array{Array{String, 1}, 1}, minsupp, maxdepth)
     uniq_items = get_unique_items(all_transacts)
     sort!(uniq_items)
-
     occ = occurrence(all_transacts, uniq_items)
-    root = Node(Int16(1), Int16[-1], BitArray(0))
+    
+    # Have to initialize `itms` array like this because type inference 
+    # seems to be broken for this otherwise (using v0.6.0)
+    itms = Array{Int16,1}(1) 
+    itms[1] = -1
+    id = Int16(1)
+    transacts = BitArray(0)
+    root::Node = Node(id, itms, transacts)
     n_items = length(uniq_items)
 
     # This loop creates 1-item nodes (i.e., first children)
@@ -256,11 +254,10 @@ end
 
 
 
-itemlist = randstring(100);
+itemlist = randstring(20, 5);
 
-
-n = 10_000
-m = 25              # number of items in transactions
+n = 100000
+m = 10              # number of items in transactions
 t = [sample(itemlist, m, replace = false) for _ in 1:n];
 
 # @code_warntype frequent(t, 1)
@@ -268,7 +265,7 @@ t = [sample(itemlist, m, replace = false) for _ in 1:n];
 @time occ2 = occurrence(t, unq2);
 @time f = frequent(t, round(Int, 0.01*n), m);
 
-
+gen_support_dict(f)
 
 function grow_support_dict!(supp_cnt::Dict{Array{Int16,1}, Int}, node::Node) 
     if has_children(node)
