@@ -34,7 +34,7 @@ struct Rule
         p = node.item_ids[mask]
         supp = node.supp/num_transacts 
         conf = supp/supp_dict[node.item_ids[mask]]
-        unmask = !mask
+        unmask = .!mask
         q_idx = findfirst(unmask)
         q = node.item_ids[q_idx]
         lift = conf/supp_dict[node.item_ids[unmask]]
@@ -75,7 +75,7 @@ function has_children(nd::Node)
     res 
 end
 
-# @code_warntype has_children(n1)
+@code_warntype has_children(n1)
 
 
 function younger_siblings(nd::Node)
@@ -83,7 +83,7 @@ function younger_siblings(nd::Node)
     return view(nd.mother.children, (nd.id + 1):n_sibs)
 end
 
-# @code_warntype younger_siblings(n1.children[1])
+@code_warntype younger_siblings(n1.children[1])
 younger_siblings(n1.children[1])
 
 
@@ -113,13 +113,13 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
     # Recurse on newly created children
     maxdepth -= 1
     if maxdepth > 1
-        for child in nd.children 
-            growtree!(child, minsupp, k+1, maxdepth)
+        for kid in nd.children 
+            growtree!(kid, minsupp, k+1, maxdepth)
         end
     end
 end 
 
-# @code_warntype growtree!(n2, 1, 3, 3)
+@code_warntype growtree!(n2, 1, 3, 3)
 growtree!(n2, 1, 3, 3)
 
 
@@ -189,7 +189,7 @@ function frequent(all_transacts::Array{Array{String, 1}, 1}, minsupp, maxdepth)
     itms[1] = -1
     id = Int16(1)
     transacts = BitArray(0)
-    root::Node = Node(id, itms, transacts)
+    root = Node(id, itms, transacts)
     n_items = length(uniq_items)
 
     # This loop creates 1-item nodes (i.e., first children)
@@ -265,7 +265,6 @@ t = [sample(itemlist, m, replace = false) for _ in 1:n];
 @time occ2 = occurrence(t, unq2);
 @time f = frequent(t, round(Int, 0.01*n), m);
 
-gen_support_dict(f)
 
 function grow_support_dict!(supp_cnt::Dict{Array{Int16,1}, Int}, node::Node) 
     if has_children(node)
@@ -285,6 +284,9 @@ function gen_support_dict(root::Node)
     grow_support_dict!(supp_cnt, root)
     return supp_cnt 
 end
+
+@code_warntype gen_support_dict(f)
+
 
 
 t1 = [["a", "b"], 
@@ -317,7 +319,7 @@ end
 
 @code_warntype gen_rules(xtree1.children[1].children[1].children[1], xsup, 3, 8)
 
-
+xrules = gen_rules(xtree1.children[1].children[1].children[1], xsup, 3, 8)
 
 
 # function compute_metrics(root::Node)
