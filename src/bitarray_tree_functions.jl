@@ -254,16 +254,16 @@ end
 
 
 
-itemlist = randstring(20, 5);
+itemlist = randstring(25, 16);
 
-n = 100000
-m = 10              # number of items in transactions
+n = 15_000
+m = 25              # number of items in transactions
 t = [sample(itemlist, m, replace = false) for _ in 1:n];
 
 # @code_warntype frequent(t, 1)
 @time unq2 = get_unique_items(t);
 @time occ2 = occurrence(t, unq2);
-@time f = frequent(t, round(Int, 0.01*n), m);
+@time xtree1 = frequent(t, round(Int, 0.01*n), 5);
 
 
 function grow_support_dict!(supp_cnt::Dict{Array{Int16,1}, Int}, node::Node) 
@@ -279,13 +279,14 @@ end
 # itemsets (their integer represenations, actually), and whose values 
 # are the support count for the given itemset. This function is used 
 # for computing support, confidence, and lift of association rules.
-function gen_support_dict(root::Node)
+function gen_support_dict(root::Node, num_transacts)
     supp_cnt = Dict{Array{Int16, 1}, Int}()
+    supp_cnt[Int16[]] = num_transacts
     grow_support_dict!(supp_cnt, root)
     return supp_cnt 
 end
 
-@code_warntype gen_support_dict(f)
+@code_warntype gen_support_dict(xtree1, n)
 
 
 
@@ -300,11 +301,12 @@ t1 = [["a", "b"],
 
 @code_warntype frequent(t1, 1, 3)
 xtree1 = frequent(t1, 1, 4);
-@code_warntype gen_support_dict(xtree1)
-xsup = gen_support_dict(xtree1)
+@code_warntype gen_support_dict(xtree1, length(t1))
+xsup = gen_support_dict(xtree1, length(t1))
 
-
-function gen_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num_transacts)
+# Given a single node in a frequent item tree, this function generates all the 
+# rules for that node. This does not include rules for the node's children.
+function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num_transacts)
     mask = trues(k)
     rules = Array{Rule, 1}(k)
     for i = 1:k 
@@ -317,9 +319,27 @@ function gen_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num_tran
     return rules 
 end
 
-@code_warntype gen_rules(xtree1.children[1].children[1].children[1], xsup, 3, 8)
+@code_warntype gen_node_rules(xtree1.children[1].children[1].children[1], xsup, 3, 8)
 
-xrules = gen_rules(xtree1.children[1].children[1].children[1], xsup, 3, 8)
+xrules = gen_node_rules(xtree1.children[1].children[1].children[1], xsup, 3, 8)
+
+
+function gen_rules!(rules::Array{Rule, 1}, root::Node, supp_dict::Dict{Array{Int16, 1}, Int}, k, num_transacts)
+    for child in root.children 
+        rules_tmp = gen_node_rules(child, supp_dict, k, num_transacts)
+        append!(rules, rules_tmp)
+        if !isempty(child.children)
+            gen_rules!(rules, child, supp_dict, k+1, num_transacts)
+        end
+    end
+end
+
+
+rule_arr = Array{Rule, 1}(0)
+gen_rules!(rule_arr, xtree1, xsup, 2, 8)
+
+
+
 
 
 # function compute_metrics(root::Node)
