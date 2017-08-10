@@ -124,15 +124,16 @@ growtree!(n2, 1, 3, 3)
 
 
 
-function get_unique_items{M}(all_transacts::Array{Array{M, 1}, 1})
+function get_unique_items{M}(transactions::Array{Array{M, 1}, 1})
     dict = Dict{M, Bool}()
 
-    for t in all_transacts
+    for t in transactions
         for i in t
             dict[i] = true
         end
     end
-    return collect(keys(dict))
+    uniq_items = collect(keys(dict))
+    return sort(uniq_items)
 end
 
 t = [["a", "b"], 
@@ -150,14 +151,14 @@ t = [["a", "b"],
 
 # This function is used internally by the frequent() function to create the 
 # initial bitarrays used to represent the first "children" in the itemset tree.
-function occurrence(all_transacts::Array{Array{String, 1}, 1}, uniq_items::Array{String, 1})
-    n = length(all_transacts)
+function occurrence(transactions::Array{Array{String, 1}, 1}, uniq_items::Array{String, 1})
+    n = length(transactions)
     p = length(uniq_items)
 
     itm_pos = Dict(zip(uniq_items, 1:p))
     res = falses(n, p)
     for i = 1:n 
-        for itm in all_transacts[i]
+        for itm in transactions[i]
             j = itm_pos[itm]
             res[i, j] = true
         end
@@ -171,17 +172,15 @@ unq = get_unique_items(t)
 
 
 """
-    frequent(all_transacts, minsupp, maxdepth)
+    frequent(transactions, minsupp, maxdepth)
 
 This function creates a frequent itemset tree from an array of transactions. 
 The tree is built recursively using calls to the growtree!() function. The 
 `minsupp` and `maxdepth` parameters control the minimum support needed for an 
 itemset to be called "frequent", and the max depth of the tree, respectively 
 """
-function frequent(all_transacts::Array{Array{String, 1}, 1}, minsupp, maxdepth)
-    uniq_items = get_unique_items(all_transacts)
-    sort!(uniq_items)
-    occ = occurrence(all_transacts, uniq_items)
+function frequent(transactions::Array{Array{String, 1}, 1}, uniq_items, minsupp, maxdepth)
+    occ = occurrence(transactions, uniq_items)
     
     # Have to initialize `itms` array like this because type inference 
     # seems to be broken for this otherwise (using v0.6.0)
@@ -219,8 +218,10 @@ t = [["a", "b"],
      ["a", "b", "c"],
      ["c", "b", "e", "f"]]
 
-@code_warntype frequent(t, 0.01, 3)
-xtree1 = frequent(t, 0.01, 4)
+unq = get_unique_items(t)
+
+@code_warntype frequent(t, unq, 0.01, 3)
+xtree1 = frequent(t, unq, 0.01, 4)
 
 
 function prettyprint(node::Node, k::Int = 0)
@@ -256,14 +257,14 @@ end
 
 itemlist = randstring(25, 16);
 
-n = 15_000
+n = 100_000
 m = 25              # number of items in transactions
 t = [sample(itemlist, m, replace = false) for _ in 1:n];
 
 # @code_warntype frequent(t, 1)
 @time unq2 = get_unique_items(t);
 @time occ2 = occurrence(t, unq2);
-@time xtree1 = frequent(t, round(Int, 0.01*n), 5);
+@time xtree1 = frequent(t, unq2, round(Int, 0.01*n), 5);
 
 
 function grow_support_dict!(supp_cnt::Dict{Array{Int16,1}, Int}, node::Node) 
@@ -300,7 +301,8 @@ t1 = [["a", "b"],
      ["c", "b", "e", "f"]]
 
 @code_warntype frequent(t1, 1, 3)
-xtree1 = frequent(t1, 1, 4);
+un3 = get_unique_items(t1)
+xtree1 = frequent(t1, unq3, 1, 4);
 @code_warntype gen_support_dict(xtree1, length(t1))
 xsup = gen_support_dict(xtree1, length(t1))
 
@@ -316,7 +318,7 @@ function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num
         end
         rules[i] = Rule(node, mask, supp_dict, num_transacts)
     end
-    return rules 
+    rules 
 end
 
 @code_warntype gen_node_rules(xtree1.children[1].children[1].children[1], xsup, 3, 8)
@@ -324,8 +326,8 @@ end
 xrules = gen_node_rules(xtree1.children[1].children[1].children[1], xsup, 3, 8)
 
 
-function gen_rules!(rules::Array{Rule, 1}, root::Node, supp_dict::Dict{Array{Int16, 1}, Int}, k, num_transacts)
-    for child in root.children 
+function gen_rules!(rules::Array{Rule, 1}, node::Node, supp_dict::Dict{Array{Int16, 1}, Int}, k, num_transacts)
+    for child in node.children 
         rules_tmp = gen_node_rules(child, supp_dict, k, num_transacts)
         append!(rules, rules_tmp)
         if !isempty(child.children)
@@ -334,13 +336,87 @@ function gen_rules!(rules::Array{Rule, 1}, root::Node, supp_dict::Dict{Array{Int
     end
 end
 
-
 rule_arr = Array{Rule, 1}(0)
-gen_rules!(rule_arr, xtree1, xsup, 2, 8)
+gen_rules!(rule_arr, xtree1.children[1], xsup, 2, 8)
+      
+
+function gen_rules(root::Node, supp_dict::Dict{Array{Int16, 1}, Int}, num_transacts)
+    rules = Array{Rule, 1}(0)
+    n_kids = length(root.children)
+    if n_kids > 0
+        for i = 1:n_kids 
+            gen_rules!(rules, xtree1.children[i], xsup, 2, num_transacts)
+        end 
+    end 
+    rules 
+end 
+
+xrules = gen_rules()
+
+function rules_to_datatable(rules::Array{Rule, 1}, item_lkup::Dict{Int16, String})
+    n_rules = length(rules)
+    dt = DataTable(lhs = fill("", n_rules), 
+                   rhs = fill("", n_rules), 
+                   supp = zeros(n_rules), 
+                   conf = zeros(n_rules), 
+                   lift = zeros(n_rules))
+    for i = 1:n_rules 
+        lhs_items = map(x -> item_lkup[x], rules[i].p)
+       
+        lhs_string = "{" * join(lhs_items, ",") * "}"
+        dt[i, :lhs] = lhs_string
+        dt[i, :rhs] = item_lkup[rules[i].q]
+        dt[i, :supp] = rules[i].supp
+        dt[i, :conf] = rules[i].conf
+        dt[i, :lift] = rules[i].lift
+    end 
+    dt 
+end 
+
+
+
+function apriori(transactions::Array{Array{String, 1}, 1}, supp::Float64, maxdepth::Int)
+    n = length(transactions)
+    uniq_items = get_unique_items(transactions)
+    item_lkup = Dict{Int16, String}()
+    for (i, itm) in enumerate(uniq_items)
+        item_lkup[i] = itm 
+    end 
+
+    freq_tree = frequent(transactions, uniq_items, round(Int, supp * n), maxdepth)
+    supp_lkup = gen_support_dict(freq_tree, n)
+    rules = gen_rules(freq_tree, supp_lkup, n)
+    rules_dt = rules_to_datatable(xrules, item_lkup)
+    return rules_dt 
+end 
 
 
 
 
+
+# Comparing with R 
+a_list = [
+    ["a", "b"],
+    ["a", "c"],
+    ["a", "b", "c"],
+    ["a", "b", "d"], 
+    ["a", "c", "d"], 
+    ["a", "b", "c", "d"],    
+    ["a", "b", "c", "e"],
+    ["b", "d", "e", "f"],
+    ["a", "c", "e", "f"],
+    ["b", "c", "d", "e", "f"],
+    ["a", "c", "d", "e", "f"],
+    ["b", "c", "d", "e", "f"]
+]
+
+
+xtree1 = frequent(a_list, 1, 6);
+xsup = gen_support_dict(xtree1, length(a_list))
+
+xrules = gen_rules(xtree1, xsup, 12)
+
+apriori(a_list, 0.01, 6)
 
 # function compute_metrics(root::Node)
 #     # supp_dict = gen_support_dict(root)
