@@ -1,6 +1,4 @@
 module ARules
-
-using StatsBase 
 using DataTables 
 
 export Node, Rule, apriori, frequent, get_unique_items, shownodes, 
