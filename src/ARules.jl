@@ -1,7 +1,7 @@
 module ARules
 using DataTables 
 
-export Node, Rule, apriori, frequent, get_unique_items, shownodes, 
+export Node, Rule, apriori, frequent, unique_items, shownodes, 
        # these below are for pilotting
        has_children, younger_siblings, growtree!, randstr, occurence, gen_support_dict,
        gen_rules!, gen_rules, gen_node_rules, occurence

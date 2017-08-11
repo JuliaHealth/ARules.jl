@@ -86,7 +86,7 @@ end
 
 function apriori(transactions::Array{Array{String, 1}, 1}, supp::Float64, maxdepth::Int)
     n = length(transactions)
-    uniq_items = get_unique_items(transactions)
+    uniq_items = unique_items(transactions)
     item_lkup = Dict{Int16, String}()
     for (i, itm) in enumerate(uniq_items)
         item_lkup[i] = itm 
