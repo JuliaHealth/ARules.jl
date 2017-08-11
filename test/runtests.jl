@@ -5,7 +5,7 @@ using Base.Test
 # write your own tests here
 
 
-itemlist = rands(25, 16);
+itemlist = randstr(25, 16);
 
 n = 100
 m = 10              # number of items in transactions

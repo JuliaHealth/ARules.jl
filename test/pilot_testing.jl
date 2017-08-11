@@ -74,7 +74,7 @@ xtree1 = frequent(t, unq, 0.01, 4)
 
 
 
-itemlist = rands(25, 16);
+itemlist = randstr(25, 16);
 
 n = 10_000
 m = 20              # number of items in transactions
