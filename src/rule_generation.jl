@@ -101,22 +101,3 @@ end
 
 
 
-
-# function compute_metrics(root::Node)
-#     # supp_dict = gen_support_dict(root)
-# end
-
-# function get_cousins(node::Node)
-#     cousins = Array{Node,1}(0)
-#     if isdefined(node, :mother) && isdefined(node.mother, :mother) 
-#         for aunt in younger_siblings(node.mother)
-#             for nd in aunt.children
-#                 push!(cousins, nd)
-#             end
-#         end
-#     end
-#     cousins
-# end
-
-# get_cousins(xtree1.children[1])
-

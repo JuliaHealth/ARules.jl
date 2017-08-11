@@ -3,6 +3,7 @@ module ARules
 include("frequent_itemset_tree.jl")
 include("rules.jl")
 include("utils.jl")
+include("rule_generation.jl")
 
 export Node, 
        Rule, 
