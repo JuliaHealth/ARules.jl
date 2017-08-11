@@ -107,7 +107,7 @@ t1 = [["a", "b"],
      ["c", "b", "e", "f"]]
 
 @code_warntype frequent(t1, 1, 3)
-un3 = get_unique_items(t1)
+unq3 = get_unique_items(t1)
 xtree1 = frequent(t1, unq3, 1, 4);
 @code_warntype gen_support_dict(xtree1, length(t1))
 xsup = gen_support_dict(xtree1, length(t1))
@@ -126,6 +126,19 @@ gen_rules!(rule_arr, xtree1.children[1], xsup, 2, 8)
 
 
 
+
+t1 = [["a", "b"], 
+     ["b", "c", "d"], 
+     ["a", "c"],
+     ["e", "b"], 
+     ["a", "c", "d"], 
+     ["a", "e"], 
+     ["a", "b", "c"],
+     ["c", "b", "e", "f"]]
+
+unq = get_unique_items(t1)
+xtree = frequent(t1, unq, 1, 4);
+shownodes(xtree)
 
 
 

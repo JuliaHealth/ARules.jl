@@ -12,19 +12,6 @@ function shownodes(node::Node, k::Int = 0)
 end
 
 
-t1 = [["a", "b"], 
-     ["b", "c", "d"], 
-     ["a", "c"],
-     ["e", "b"], 
-     ["a", "c", "d"], 
-     ["a", "e"], 
-     ["a", "b", "c"],
-     ["c", "b", "e", "f"]]
-
-unq = get_unique_items(t1)
-xtree = frequent(t1, unq, 1, 4);
-shownodes(xtree)
-
 
 
 function rands(n::Int, len::Int = 16)
