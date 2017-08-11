@@ -87,3 +87,68 @@ t = [sample(itemlist, m, replace = false) for _ in 1:n];
 @time xtree1 = frequent(t, unq2, round(Int, 0.01*n), mx_depth);
 
 
+
+
+
+
+
+# Rule Generation Testing
+@code_warntype gen_support_dict(xtree1, n)
+
+
+
+t1 = [["a", "b"], 
+     ["b", "c", "d"], 
+     ["a", "c"],
+     ["e", "b"], 
+     ["a", "c", "d"], 
+     ["a", "e"], 
+     ["a", "b", "c"],
+     ["c", "b", "e", "f"]]
+
+@code_warntype frequent(t1, 1, 3)
+un3 = get_unique_items(t1)
+xtree1 = frequent(t1, unq3, 1, 4);
+@code_warntype gen_support_dict(xtree1, length(t1))
+xsup = gen_support_dict(xtree1, length(t1))
+
+
+
+@code_warntype gen_node_rules(xtree1.children[1].children[1].children[1], xsup, 3, 8)
+
+xrules = gen_node_rules(xtree1.children[1].children[1].children[1], xsup, 3, 8)
+
+
+
+rule_arr = Array{Rule, 1}(0)
+gen_rules!(rule_arr, xtree1.children[1], xsup, 2, 8)
+      
+
+
+
+
+
+
+# Comparing with R 
+a_list = [
+    ["a", "b"],
+    ["a", "c"],
+    ["a", "b", "c"],
+    ["a", "b", "d"], 
+    ["a", "c", "d"], 
+    ["a", "b", "c", "d"],    
+    ["a", "b", "c", "e"],
+    ["b", "d", "e", "f"],
+    ["a", "c", "e", "f"],
+    ["b", "c", "d", "e", "f"],
+    ["a", "c", "d", "e", "f"],
+    ["b", "c", "d", "e", "f"]
+]
+
+xunq = get_unique_items(a_list)
+xtree1 = frequent(a_list, xunq, 1, 6);
+xsup = gen_support_dict(xtree1, length(a_list))
+
+xrules = gen_rules(xtree1, xsup, 12)
+
+apriori(a_list, 0.01, 6)
