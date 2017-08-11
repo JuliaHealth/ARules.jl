@@ -1,4 +1,5 @@
 using ARules
+using StatsBase
 using Base.Test
 
 # write your own tests here
