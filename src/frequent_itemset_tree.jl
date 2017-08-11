@@ -53,7 +53,7 @@ end
 
 function younger_siblings(nd::Node)
     n_sibs = length(nd.mother.children)
-    return view(nd.mother.children, nd.id + 1):n_sibs)
+    return view(nd.mother.children, (nd.id + 1):n_sibs)
 end
 
 
