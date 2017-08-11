@@ -54,7 +54,7 @@ function gen_rules(root::Node, supp_dict::Dict{Array{Int16, 1}, Int}, num_transa
     n_kids = length(root.children)
     if n_kids > 0
         for i = 1:n_kids 
-            gen_rules!(rules, xtree1.children[i], xsup, 2, num_transacts)
+            gen_rules!(rules, root.children[i], xsup, 2, num_transacts)
         end 
     end 
     rules 
