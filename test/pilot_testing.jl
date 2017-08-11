@@ -46,11 +46,11 @@ t = [["a", "b"],
      ["a", "b", "c"],
      ["c", "b", "e"]]
 
-@code_warntype get_unique_items(t);
-@time get_unique_items(t);
+@code_warntype unique_items(t);
+@time unique_items(t);
 
 
-unq = get_unique_items(t)
+unq = unique_items(t)
 @code_warntype occurrence(t, unq)
 @time occurrence(t, unq)
 
@@ -66,10 +66,10 @@ t = [["a", "b"],
      ["a", "b", "c"],
      ["c", "b", "e", "f"]]
 
-unq = get_unique_items(t)
+unq = unique_items(t)
 
-@code_warntype frequent(t, unq, 0.01, 3)
-xtree1 = frequent(t, unq, 0.01, 4)
+@code_warntype _frequent(t, unq, 0.01, 3)
+xtree1 = _frequent(t, unq, 0.01, 4)
 
 
 
@@ -81,10 +81,10 @@ m = 20              # number of items in transactions
 mx_depth = 5
 t = [sample(itemlist, m, replace = false) for _ in 1:n];
 
-# @code_warntype frequent(t, 1)
-@time unq2 = get_unique_items(t);
+# @code_warntype _frequent(t, 1)
+@time unq2 = unique_items(t);
 @time occ2 = occurrence(t, unq2);
-@time xtree1 = frequent(t, unq2, round(Int, 0.01*n), mx_depth);
+@time xtree1 = _frequent(t, unq2, round(Int, 0.01*n), mx_depth);
 
 
 
@@ -106,9 +106,9 @@ t1 = [["a", "b"],
      ["a", "b", "c"],
      ["c", "b", "e", "f"]]
 
-@code_warntype frequent(t1, 1, 3)
-unq3 = get_unique_items(t1)
-xtree1 = frequent(t1, unq3, 1, 4);
+@code_warntype _frequent(t1, 1, 3)
+unq3 = unique_items(t1)
+xtree1 = _frequent(t1, unq3, 1, 4);
 @code_warntype gen_support_dict(xtree1, length(t1))
 xsup = gen_support_dict(xtree1, length(t1))
 
@@ -136,8 +136,8 @@ t1 = [["a", "b"],
      ["a", "b", "c"],
      ["c", "b", "e", "f"]]
 
-unq = get_unique_items(t1)
-xtree = frequent(t1, unq, 1, 4);
+unq = unique_items(t1)
+xtree = _frequent(t1, unq, 1, 4);
 shownodes(xtree)
 
 
@@ -158,8 +158,8 @@ a_list = [
     ["b", "c", "d", "e", "f"]
 ]
 
-xunq = get_unique_items(a_list)
-xtree1 = frequent(a_list, xunq, 1, 6);
+xunq = unique_items(a_list)
+xtree1 = _frequent(a_list, xunq, 1, 6);
 xsup = gen_support_dict(xtree1, length(a_list))
 
 xrules = gen_rules(xtree1, xsup, 12)

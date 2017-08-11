@@ -10,7 +10,7 @@ function grow_support_dict!(supp_cnt::Dict{Array{Int16,1}, Int}, node::Node)
     end
 end
 
-# This function generates a dictionary whose keys are the frequent 
+# This function generates a dictionary whose keys are the _frequent 
 # itemsets (their integer represenations, actually), and whose values 
 # are the support count for the given itemset. This function is used 
 # for computing support, confidence, and lift of association rules.
@@ -22,7 +22,7 @@ function gen_support_dict(root::Node, num_transacts)
 end
 
 
-# Given a single node in a frequent item tree, this function generates all the 
+# Given a single node in a _frequent item tree, this function generates all the 
 # rules for that node. This does not include rules for the node's children.
 function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num_transacts)
     mask = trues(k)
@@ -69,7 +69,6 @@ function rules_to_datatable(rules::Array{Rule, 1}, item_lkup::Dict{Int16, String
                    conf = zeros(n_rules), 
                    lift = zeros(n_rules))
     for i = 1:n_rules 
-        println(rules[i].p)
         lhs_items = map(x -> item_lkup[x], rules[i].p)
        
         lhs_string = "{" * join(lhs_items, ",") * "}"
@@ -92,7 +91,7 @@ function apriori(transactions::Array{Array{String, 1}, 1}, supp::Float64, maxdep
         item_lkup[i] = itm 
     end 
 
-    freq_tree = frequent(transactions, uniq_items, round(Int, supp * n), maxdepth)
+    freq_tree = _frequent(transactions, uniq_items, round(Int, supp * n), maxdepth)
     supp_lkup = gen_support_dict(freq_tree, n)
     rules = gen_rules(freq_tree, supp_lkup, n)
     rules_dt = rules_to_datatable(rules, item_lkup)

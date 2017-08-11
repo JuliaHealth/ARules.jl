@@ -125,14 +125,14 @@ end
 
 
 """
-    frequent(transactions, minsupp, maxdepth)
+    _frequent(transactions, minsupp, maxdepth)
 
 This function creates a frequent itemset tree from an array of transactions. 
 The tree is built recursively using calls to the growtree!() function. The 
 `minsupp` and `maxdepth` parameters control the minimum support needed for an 
 itemset to be called "frequent", and the max depth of the tree, respectively 
 """
-function frequent(transactions::Array{Array{String, 1}, 1}, uniq_items, minsupp, maxdepth)
+function _frequent(transactions::Array{Array{String, 1}, 1}, uniq_items, minsupp, maxdepth)
     occ = occurrence(transactions, uniq_items)
     
     # Have to initialize `itms` array like this because type inference 
@@ -159,6 +159,52 @@ function frequent(transactions::Array{Array{String, 1}, 1}, uniq_items, minsupp,
         growtree!(root.children[j], minsupp, 2, maxdepth)
     end
     root 
+end
+
+
+function suppdict_to_datatable(supp_lkup, item_lkup)
+    n_sets = length(supp_lkup)
+    dt = DataTable(itemset = fill("", n_sets), 
+                   supp = zeros(Int, n_sets))
+    i = 1
+
+    for (k, v) in supp_lkup
+        item_names = map(x -> item_lkup[x], k)
+        println(item_names)
+        println(i)
+        itemset_string = "{" * join(item_names, ",") * "}"
+        dt[i, :itemset] = itemset_string
+        dt[i, :supp] = v
+        i += 1
+    end 
+    dt 
+end
+
+
+
+# TODO: Fix the function below so that it handles int `minsupp`
+
+"""
+    frequent()
+This function just acts as a bit of a convenience function that returns the frequent  
+item sets and their support count (integer) when given and array of transactions. It 
+basically just wraps _frequent() but gives back the plain text of the items, rather than 
+that Int16 representation.
+"""
+function frequent(transactions::Array{Array{String, 1}, 1}, minsupp, maxdepth)
+    n = length(transactions)
+    uniq_items = unique_items(transactions)
+    item_lkup = Dict{Int16, String}()
+    for (i, itm) in enumerate(uniq_items)
+        item_lkup[i] = itm 
+    end 
+
+    freq_tree = _frequent(transactions, uniq_items, round(Int, minsupp * n), maxdepth)
+    
+    supp_lkup = ARules.gen_support_dict(freq_tree, n)
+   
+    freq = suppdict_to_datatable(supp_lkup, item_lkup)
+    return freq 
 end
 
 
