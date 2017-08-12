@@ -191,17 +191,21 @@ item sets and their support count (integer) when given and array of transactions
 basically just wraps _frequent() but gives back the plain text of the items, rather than 
 that Int16 representation.
 """
-function frequent(transactions::Array{Array{String, 1}, 1}, minsupp, maxdepth)
+function frequent(transactions::Array{Array{String, 1}, 1}, minsupp::T, maxdepth)
     n = length(transactions)
     uniq_items = unique_items(transactions)
     item_lkup = Dict{Int16, String}()
     for (i, itm) in enumerate(uniq_items)
         item_lkup[i] = itm 
     end 
-
-    freq_tree = _frequent(transactions, uniq_items, round(Int, minsupp * n), maxdepth)
+    if T <: Integer 
+        supp = minsupp 
+    elseif T == Float64
+        supp = round(Int, minsupp * n)
+    end
+    freq_tree = _frequent(transactions, uniq_items, supp, maxdepth)
     
-    supp_lkup = ARules.gen_support_dict(freq_tree, n)
+    supp_lkup = gen_support_dict(freq_tree, n)
    
     freq = suppdict_to_datatable(supp_lkup, item_lkup)
     return freq 
