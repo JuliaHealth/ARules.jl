@@ -191,7 +191,7 @@ item sets and their support count (integer) when given and array of transactions
 basically just wraps _frequent() but gives back the plain text of the items, rather than 
 that Int16 representation.
 """
-function frequent(transactions::Array{Array{String, 1}, 1}, minsupp::T, maxdepth)
+function frequent(transactions::Array{Array{String, 1}, 1}, minsupp::T, maxdepth) where T
     n = length(transactions)
     uniq_items = unique_items(transactions)
     item_lkup = Dict{Int16, String}()
