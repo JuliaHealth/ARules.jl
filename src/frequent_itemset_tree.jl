@@ -201,7 +201,7 @@ function frequent(transactions::Array{Array{String, 1}, 1}, minsupp::T, maxdepth
     if T <: Integer 
         supp = minsupp 
     elseif T == Float64
-        supp = ceil(Int, minsupp * n)
+        supp = round(Int, minsupp * n)
     end
     freq_tree = _frequent(transactions, uniq_items, supp, maxdepth)
     
