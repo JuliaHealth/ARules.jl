@@ -91,7 +91,7 @@ function apriori(transactions::Array{Array{String, 1}, 1}, supp::Float64, maxdep
         item_lkup[i] = itm 
     end 
 
-    freq_tree = _frequent(transactions, uniq_items, round(Int, supp * n), maxdepth)
+    freq_tree = _frequent(transactions, uniq_items, ceil(Int, supp * n), maxdepth)
     supp_lkup = gen_support_dict(freq_tree, n)
     rules = gen_rules(freq_tree, supp_lkup, n)
     rules_dt = rules_to_datatable(rules, item_lkup)
