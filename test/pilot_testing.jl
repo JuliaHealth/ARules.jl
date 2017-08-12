@@ -76,9 +76,9 @@ xtree1 = _frequent(t, unq, 0.01, 4)
 
 itemlist = randstr(25, 16);
 
-n = 10_000
-m = 20              # number of items in transactions
-mx_depth = 5
+n = 100_000
+m = 25             # number of items in transactions
+mx_depth = 7
 t = [sample(itemlist, m, replace = false) for _ in 1:n];
 
 # @code_warntype _frequent(t, 1)
@@ -165,3 +165,71 @@ xsup = gen_support_dict(xtree1, length(a_list))
 xrules = gen_rules(xtree1, xsup, 12)
 
 apriori(a_list, 0.01, 6)
+
+
+
+
+
+
+
+# Example below used to track down bug of unexplored node Int16[4, 10, 14]
+transactions = [["milk", "eggs", "bread"],
+                ["butter", "milk", "sugar", "flour", "eggs"],
+                ["bacon", "eggs", "milk", "beer"],
+                ["bread", "ham", "turkey"],
+                ["cheese", "ham", "bread", "ketchup"],
+                ["mustard", "hot dogs", "buns", "hamburger", "cheese", "beer"],
+                ["milk", "sugar", "eggs"],
+                ["hamburger", "ketchup", "milk", "beer"],
+                ["ham", "cheese", "bacon", "eggs"]]
+
+freq = frequent(transactions, 1, 7)
+display(freq)
+
+for x in freq[:itemset] 
+    println(x)
+end
+
+unq = unique_items(transactions)
+
+node = _frequent(transactions, unq, 0.01, 6)
+sup = gen_support_dict(node, 9)
+
+for k in keys(sup)
+    println(k)
+end
+
+rules = apriori(transactions, 0.1, 4)
+
+
+
+
+
+
+
+
+transactions = [["milk", "eggs", "bread"],
+                ["butter", "milk", "sugar", "flour", "eggs"],
+                ["bacon", "eggs", "milk", "beer"],
+                ["bread", "ham", "turkey"],
+                ["cheese", "ham", "bread", "ketchup"],
+                ["mustard", "hot dogs", "buns", "hamburger", "cheese", "beer"]]
+
+freq = frequent(transactions, 1, 7)
+# display(freq)
+
+unq = unique_items(transactions)
+unq[[4, 10, 14]]
+
+node = _frequent(transactions, unq, 0.01, 6)
+shownodes(node)
+
+sup = gen_support_dict(node, 9)
+
+
+
+
+
+
+
+

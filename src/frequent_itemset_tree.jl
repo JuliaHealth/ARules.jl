@@ -51,23 +51,23 @@ function has_children(nd::Node)
 end
 
 
-function younger_siblings(nd::Node)
+function older_siblings(nd::Node)
     n_sibs = length(nd.mother.children)
-    return view(nd.mother.children, (nd.id + 1):n_sibs)
+    # println("length sibs: ", n_sibs)
+    sib_indcs = map(x -> x.id > nd.id, nd.mother.children)
+    return view(nd.mother.children, sib_indcs)
 end
 
-
-function update_support_cnt!(supp_dict::Dict, nd::Node)
-    supp_dict[nd.item_ids] = nd.supp 
-end
 
 # This function is used internally and is the workhorse of the frequent()
 # function, which generates a frequent itemset tree. The growtree!() function 
 # builds up the frequent itemset tree recursively.
 function growtree!(nd::Node, minsupp, k, maxdepth)
-    sibs = younger_siblings(nd)
+    sibs = older_siblings(nd)
+    # println("length sibs: ", length(sibs))
 
     for j = 1:length(sibs)
+        # println("sibs: ", sibs[j].item_ids)
         transacts = nd.transactions .& sibs[j].transactions
         supp = sum(transacts)
         
@@ -75,15 +75,23 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
             items = zeros(Int16, k)
             items[1:k-1] = nd.item_ids[1:k-1]
             items[end] = sibs[j].item_ids[end]
-            
+            # println("new  node: ", items)
             child = Node(Int16(j), items, transacts, nd, supp)
             push!(nd.children, child)
-        end
+        # # for debugging
+        # else 
+        #     items = zeros(Int16, k)
+        #     items[1:k-1] = nd.item_ids[1:k-1]
+        #     items[end] = sibs[j].item_ids[end]
+        #     info("not including because of unmet support: ")
+        #     println(items)
+        end 
     end
     # Recurse on newly created children
     maxdepth -= 1
     if maxdepth > 1
         for kid in nd.children 
+            # println("running kid: ", kid.item_ids)
             growtree!(kid, minsupp, k+1, maxdepth)
         end
     end
@@ -170,8 +178,6 @@ function suppdict_to_datatable(supp_lkup, item_lkup)
 
     for (k, v) in supp_lkup
         item_names = map(x -> item_lkup[x], k)
-        println(item_names)
-        println(i)
         itemset_string = "{" * join(item_names, ",") * "}"
         dt[i, :itemset] = itemset_string
         dt[i, :supp] = v
