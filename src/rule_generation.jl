@@ -55,7 +55,7 @@ function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num
 
         conf = supp/((supp_dict[node.item_ids[lhs_keep]])/num_transacts)
         rhs_keep = .!lhs_keep
-        q = node.item_ids[rhs_keep]
+        q = first(node.item_ids[rhs_keep])
         lift = conf/((supp_dict[node.item_ids[rhs_keep]])/num_transacts)
 
         rule = Rule(p, q, supp, conf, lift)
