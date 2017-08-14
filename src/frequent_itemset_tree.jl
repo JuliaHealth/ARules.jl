@@ -12,27 +12,27 @@ struct Node
     function Node(id::Int16, item_ids::Array{Int16,1}, transactions::BitArray{1})
         children = Array{Node,1}(0)
         nd = new(id, item_ids, transactions, children)
-        return nd 
+        return nd
     end
 
     function Node(id::Int16, item_ids::Array{Int16,1}, transactions::BitArray{1}, mother::Node, supp::Int)
         children = Array{Node,1}(0)
         nd = new(id, item_ids, transactions, children, mother, supp)
-        return nd 
+        return nd
     end
 end
 
 
-struct Rule 
+struct Rule
     p::Array{Int16,1}
     q::Int16
-    supp::Float64  
-    conf::Float64 
-    lift::Float64 
+    supp::Float64
+    conf::Float64
+    lift::Float64
 
     function Rule(node::Node, mask::BitArray{1}, supp_dict::Dict{Array{Int16,1}, Int}, num_transacts::Int)
         p = node.item_ids[mask]
-        supp = node.supp/num_transacts 
+        supp = node.supp/num_transacts
         conf = supp/supp_dict[node.item_ids[mask]]
         unmask = .!mask
         q_idx = findfirst(unmask)
@@ -40,14 +40,14 @@ struct Rule
         lift = conf/supp_dict[node.item_ids[unmask]]
 
         rule = new(p, q, supp, conf, lift)
-        return rule 
+        return rule
     end
-end 
+end
 
 
 function has_children(nd::Node)
     res = length(nd.children) > 0
-    res 
+    res
 end
 
 
@@ -60,7 +60,7 @@ end
 
 
 # This function is used internally and is the workhorse of the frequent()
-# function, which generates a frequent itemset tree. The growtree!() function 
+# function, which generates a frequent itemset tree. The growtree!() function
 # builds up the frequent itemset tree recursively.
 function growtree!(nd::Node, minsupp, k, maxdepth)
     sibs = older_siblings(nd)
@@ -70,7 +70,7 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
         # println("sibs: ", sibs[j].item_ids)
         transacts = nd.transactions .& sibs[j].transactions
         supp = sum(transacts)
-        
+
         if supp ≥ minsupp
             items = zeros(Int16, k)
             items[1:k-1] = nd.item_ids[1:k-1]
@@ -79,23 +79,23 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
             child = Node(Int16(j), items, transacts, nd, supp)
             push!(nd.children, child)
         # # for debugging
-        # else 
+        # else
         #     items = zeros(Int16, k)
         #     items[1:k-1] = nd.item_ids[1:k-1]
         #     items[end] = sibs[j].item_ids[end]
         #     info("not including because of unmet support: ")
         #     println(items)
-        end 
+        end
     end
     # Recurse on newly created children
     maxdepth -= 1
     if maxdepth > 1
-        for kid in nd.children 
+        for kid in nd.children
             # println("running kid: ", kid.item_ids)
             growtree!(kid, minsupp, k+1, maxdepth)
         end
     end
-end 
+end
 
 
 
@@ -113,7 +113,7 @@ end
 
 
 
-# This function is used internally by the frequent() function to create the 
+# This function is used internally by the frequent() function to create the
 # initial bitarrays used to represent the first "children" in the itemset tree.
 function occurrence(transactions::Array{Array{String, 1}, 1}, uniq_items::Array{String, 1})
     n = length(transactions)
@@ -121,31 +121,31 @@ function occurrence(transactions::Array{Array{String, 1}, 1}, uniq_items::Array{
 
     itm_pos = Dict(zip(uniq_items, 1:p))
     res = falses(n, p)
-    for i = 1:n 
+    for i = 1:n
         for itm in transactions[i]
             j = itm_pos[itm]
             res[i, j] = true
         end
     end
-    res 
+    res
 end
 
 
 
 """
-    _frequent(transactions, minsupp, maxdepth)
+    frequent_item_tree(transactions, minsupp, maxdepth)
 
-This function creates a frequent itemset tree from an array of transactions. 
-The tree is built recursively using calls to the growtree!() function. The 
-`minsupp` and `maxdepth` parameters control the minimum support needed for an 
-itemset to be called "frequent", and the max depth of the tree, respectively 
+This function creates a frequent itemset tree from an array of transactions.
+The tree is built recursively using calls to the growtree!() function. The
+`minsupp` and `maxdepth` parameters control the minimum support needed for an
+itemset to be called "frequent", and the max depth of the tree, respectively
 """
-function _frequent(transactions::Array{Array{String, 1}, 1}, uniq_items, minsupp, maxdepth)
+function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items, minsupp, maxdepth)
     occ = occurrence(transactions, uniq_items)
-    
-    # Have to initialize `itms` array like this because type inference 
+
+    # Have to initialize `itms` array like this because type inference
     # seems to be broken for this otherwise (using v0.6.0)
-    itms = Array{Int16,1}(1) 
+    itms = Array{Int16,1}(1)
     itms[1] = -1
     id = Int16(1)
     transacts = BitArray(0)
@@ -166,13 +166,13 @@ function _frequent(transactions::Array{Array{String, 1}, 1}, uniq_items, minsupp
     for j = 1:n_kids
         growtree!(root.children[j], minsupp, 2, maxdepth)
     end
-    root 
+    root
 end
 
 
 function suppdict_to_datatable(supp_lkup, item_lkup)
     n_sets = length(supp_lkup)
-    dt = DataTable(itemset = fill("", n_sets), 
+    dt = DataTable(itemset = fill("", n_sets),
                    supp = zeros(Int, n_sets))
     i = 1
 
@@ -182,8 +182,8 @@ function suppdict_to_datatable(supp_lkup, item_lkup)
         dt[i, :itemset] = itemset_string
         dt[i, :supp] = v
         i += 1
-    end 
-    dt 
+    end
+    dt
 end
 
 
@@ -192,9 +192,9 @@ end
 
 """
     frequent()
-This function just acts as a bit of a convenience function that returns the frequent  
-item sets and their support count (integer) when given and array of transactions. It 
-basically just wraps _frequent() but gives back the plain text of the items, rather than 
+This function just acts as a bit of a convenience function that returns the frequent
+item sets and their support count (integer) when given and array of transactions. It
+basically just wraps frequent_item_tree() but gives back the plain text of the items, rather than
 that Int16 representation.
 """
 function frequent(transactions::Array{Array{String, 1}, 1}, minsupp::T, maxdepth) where T <: Real
@@ -202,19 +202,17 @@ function frequent(transactions::Array{Array{String, 1}, 1}, minsupp::T, maxdepth
     uniq_items = unique_items(transactions)
     item_lkup = Dict{Int16, String}()
     for (i, itm) in enumerate(uniq_items)
-        item_lkup[i] = itm 
-    end 
-    if T <: Integer 
-        supp = minsupp 
+        item_lkup[i] = itm
+    end
+    if T <: Integer
+        supp = minsupp
     elseif T == Float64
         supp = round(Int, minsupp * n)
     end
-    freq_tree = _frequent(transactions, uniq_items, supp, maxdepth)
-    
+    freq_tree = frequent_item_tree(transactions, uniq_items, supp, maxdepth)
+
     supp_lkup = gen_support_dict(freq_tree, n)
-   
+
     freq = suppdict_to_datatable(supp_lkup, item_lkup)
-    return freq 
+    return freq
 end
-
-

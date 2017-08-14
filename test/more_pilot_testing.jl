@@ -27,3 +27,4 @@ for k in keys(sup)
 end
 
 rules = apriori(transactions, 0.1, 4)
+display(rules)
