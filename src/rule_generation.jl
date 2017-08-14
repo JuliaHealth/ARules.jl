@@ -8,14 +8,14 @@ struct Rule
     conf::Float64
     lift::Float64
 
-    function Rule(node::Node, mask::BitArray{1}, supp_dict::Dict{Array{Int16,1}, Int}, num_transacts::Int)
-        p = node.item_ids[mask]
+    function Rule(node::Node, lhs_keep::BitArray{1}, supp_dict::Dict{Array{Int16,1}, Int}, num_transacts::Int)
+        p = node.item_ids[lhs_keep]
         supp = node.supp/num_transacts
-        conf = supp/supp_dict[node.item_ids[mask]]
-        unmask = .!mask
-        q_idx = findfirst(unmask)
+        conf = supp/((supp_dict[node.item_ids[lhs_keep]])/num_transacts)
+        rhs_keep = .!lhs_keep
+        q_idx = findfirst(rhs_keep)
         q = node.item_ids[q_idx]
-        lift = conf/supp_dict[node.item_ids[unmask]]
+        lift = conf/((supp_dict[node.item_ids[rhs_keep]])/num_transacts)
 
         rule = new(p, q, supp, conf, lift)
         return rule
@@ -52,14 +52,14 @@ end
 # Given a single node in a frequent item tree, this function generates all the
 # rules for that node. This does not include rules for the node's children.
 function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num_transacts)
-    mask = trues(k)
+    lhs_keep = trues(k)
     rules = Array{Rule, 1}(k)
     for i = 1:k
-        mask[i] = false
+        lhs_keep[i] = false
         if i > 1
-            mask[i-1] = true
+            lhs_keep[i-1] = true
         end
-        rules[i] = Rule(node, mask, supp_dict, num_transacts)
+        rules[i] = Rule(node, lhs_keep, supp_dict, num_transacts)
     end
     rules
 end
