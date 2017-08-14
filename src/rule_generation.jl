@@ -84,6 +84,7 @@ end
 function gen_rules(root::Node, supp_dict::Dict{Array{Int16, 1}, Int}, num_transacts)
     rules = Array{Rule, 1}(0)
     n_kids = length(root.children)
+    println("Node: ", root.item_ids, " has $n_kids children")
     if n_kids > 0
         for i = 1:n_kids
             gen_rules!(rules, root.children[i], supp_dict, 2, num_transacts)
