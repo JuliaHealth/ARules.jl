@@ -1,6 +1,28 @@
 # rule_generation.jl
 
 
+struct Rule
+    p::Array{Int16,1}
+    q::Int16
+    supp::Float64
+    conf::Float64
+    lift::Float64
+
+    function Rule(node::Node, mask::BitArray{1}, supp_dict::Dict{Array{Int16,1}, Int}, num_transacts::Int)
+        p = node.item_ids[mask]
+        supp = node.supp/num_transacts
+        conf = supp/supp_dict[node.item_ids[mask]]
+        unmask = .!mask
+        q_idx = findfirst(unmask)
+        q = node.item_ids[q_idx]
+        lift = conf/supp_dict[node.item_ids[unmask]]
+
+        rule = new(p, q, supp, conf, lift)
+        return rule
+    end
+end
+
+
 function update_support_cnt!(supp_dict::Dict, nd::Node)
     supp_dict[nd.item_ids] = nd.supp
 end
