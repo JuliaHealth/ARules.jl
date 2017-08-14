@@ -7,19 +7,6 @@ struct Rule
     supp::Float64
     conf::Float64
     lift::Float64
-
-    function Rule(node::Node, lhs_keep::BitArray{1}, supp_dict::Dict{Array{Int16,1}, Int}, num_transacts::Int)
-        p = node.item_ids[lhs_keep]
-        supp = node.supp/num_transacts
-        conf = node.supp/supp_dict[node.item_ids[lhs_keep]]
-        rhs_keep = .!lhs_keep
-        q_idx = findfirst(rhs_keep)
-        q = node.item_ids[q_idx]
-        lift = conf/supp_dict[node.item_ids[rhs_keep]]
-
-        rule = new(p, q, supp, conf, lift)
-        return rule
-    end
 end
 
 
@@ -53,13 +40,26 @@ end
 # rules for that node. This does not include rules for the node's children.
 function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num_transacts)
     lhs_keep = trues(k)
-    rules = Array{Rule, 1}(k)
+    rules = Array{Rule, 1}(0)
     for i = 1:k
         lhs_keep[i] = false
         if i > 1
             lhs_keep[i-1] = true
         end
-        rules[i] = Rule(node, lhs_keep, supp_dict, num_transacts)
+        p = node.item_ids[lhs_keep]
+        supp = node.supp/num_transacts
+        # for debugging
+        if supp == 0.0
+            println("zero supp for: ", node.item_ids)
+        end
+
+        conf = supp/((supp_dict[node.item_ids[lhs_keep]])/num_transacts)
+        rhs_keep = .!lhs_keep
+        q = node.item_ids[rhs_keep]
+        lift = conf/((supp_dict[node.item_ids[rhs_keep]])/num_transacts)
+
+        rule = Rule(p, q, supp, conf, lift)
+        push!(rules, rule)
     end
     rules
 end
