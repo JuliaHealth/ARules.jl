@@ -51,7 +51,8 @@ function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num
         # for debugging
         if supp == 0.0
             println("zero supp for: ", node.item_ids)
-        end
+            return rules
+        else
 
         conf = supp/((supp_dict[node.item_ids[lhs_keep]])/num_transacts)
         rhs_keep = .!lhs_keep
@@ -60,6 +61,7 @@ function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num
 
         rule = Rule(p, q, supp, conf, lift)
         push!(rules, rule)
+        end
     end
     rules
 end
@@ -67,6 +69,7 @@ end
 
 function gen_rules!(rules::Array{Rule, 1}, node::Node, supp_dict::Dict{Array{Int16, 1}, Int}, k, num_transacts)
     for child in node.children
+        info("Running gen_rules!() on node: ", child.item_ids)
         rules_tmp = gen_node_rules(child, supp_dict, k, num_transacts)
         append!(rules, rules_tmp)
         if !isempty(child.children)
