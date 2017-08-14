@@ -11,11 +11,11 @@ struct Rule
     function Rule(node::Node, lhs_keep::BitArray{1}, supp_dict::Dict{Array{Int16,1}, Int}, num_transacts::Int)
         p = node.item_ids[lhs_keep]
         supp = node.supp/num_transacts
-        conf = supp/((supp_dict[node.item_ids[lhs_keep]])/num_transacts)
+        conf = node.supp/supp_dict[node.item_ids[lhs_keep]]
         rhs_keep = .!lhs_keep
         q_idx = findfirst(rhs_keep)
         q = node.item_ids[q_idx]
-        lift = conf/((supp_dict[node.item_ids[rhs_keep]])/num_transacts)
+        lift = conf/supp_dict[node.item_ids[rhs_keep]]
 
         rule = new(p, q, supp, conf, lift)
         return rule
