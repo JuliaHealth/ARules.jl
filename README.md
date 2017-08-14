@@ -7,7 +7,7 @@
 [![codecov.io](http://codecov.io/github/bcbi/ARules.jl/coverage.svg?branch=master)](http://codecov.io/github/bcbi/ARules.jl?branch=master)
 
 ## 1. Installation
-```
+```julia
 julia> Pkg.clone("https://github.com/bcbi/ARules.jl")
 ```
 
@@ -47,7 +47,6 @@ julia> transactions = [["milk", "eggs", "bread"],
                        ["hamburger", "ketchup", "milk", "beer"],
                        ["ham", "cheese", "bacon", "eggs"]]
 
-julia> unq = unique_items(transactions)
 
 julia> rules = apriori(transactions, 0.01, 6)
 ```
