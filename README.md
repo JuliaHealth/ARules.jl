@@ -20,16 +20,16 @@ size of itemset to consider, respectively.
 julia> using ARules 
 
 julia> transactions = [["milk", "eggs", "bread"],
-					   ["butter", "milk", "sugar", "flour", "eggs"],
-					   ["bacon", "eggs", "milk", "beer"],
-					   ["bread", "ham", "turkey"],
-					   ["cheese", "ham", "bread", "ketchup"],
-					   ["mustard", "hot dogs", "buns", "hamburger", "cheese", "beer"],
-					   ["milk", "sugar", "eggs"],
-					   ["hamburger", "ketchup", "milk", "beer"],
-					   ["ham", "cheese", "bacon", "eggs"]]
+                       ["butter", "milk", "sugar", "flour", "eggs"],
+                       ["bacon", "eggs", "milk", "beer"],
+                       ["bread", "ham", "turkey"],
+                       ["cheese", "ham", "bread", "ketchup"],
+                       ["mustard", "hot dogs", "buns", "hamburger", "cheese", "beer"],
+                       ["milk", "sugar", "eggs"],
+                       ["hamburger", "ketchup", "milk", "beer"],
+                       ["ham", "cheese", "bacon", "eggs"]]
 
-julia> frequent(transactions, 2, 5)				# uses a-priori algorithm
+julia> frequent(transactions, 2, 6)				# uses a-priori algorithm
 ```
 
 ## 3. Association Rule Generation
@@ -38,18 +38,18 @@ The `apriori()` function can be used to obtain association rules.
 julia> using ARules 
 
 julia> transactions = [["milk", "eggs", "bread"],
-					   ["butter", "milk", "sugar", "flour", "eggs"],
-					   ["bacon", "eggs", "milk", "beer"],
-					   ["bread", "ham", "turkey"],
-					   ["cheese", "ham", "bread", "ketchup"],
-					   ["mustard", "hot dogs", "buns", "hamburger", "cheese", "beer"],
-					   ["milk", "sugar", "eggs"],
-					   ["hamburger", "ketchup", "milk", "beer"],
-					   ["ham", "cheese", "bacon", "eggs"]]
+                       ["butter", "milk", "sugar", "flour", "eggs"],
+                       ["bacon", "eggs", "milk", "beer"],
+                       ["bread", "ham", "turkey"],
+                       ["cheese", "ham", "bread", "ketchup"],
+                       ["mustard", "hot dogs", "buns", "hamburger", "cheese", "beer"],
+                       ["milk", "sugar", "eggs"],
+                       ["hamburger", "ketchup", "milk", "beer"],
+                       ["ham", "cheese", "bacon", "eggs"]]
 
 julia> unq = unique_items(transactions)
 
-julia> rules = apriori(transactions, 0.01, 4)
+julia> rules = apriori(transactions, 0.01, 6)
 ```
 
 
