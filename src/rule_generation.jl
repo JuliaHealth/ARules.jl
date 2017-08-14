@@ -69,7 +69,8 @@ end
 
 function gen_rules!(rules::Array{Rule, 1}, node::Node, supp_dict::Dict{Array{Int16, 1}, Int}, k, num_transacts)
     m = length(node.children)
-    println("Node: ", node.id, " ", node.item_ids, " has $m children")
+    # println("Node: ", node.id, " ", node.item_ids, " has $m children")
+    shownodes(node)
     for child in node.children
         println("Running gen_rules!() on node: ", child.item_ids)
         rules_tmp = gen_node_rules(child, supp_dict, k, num_transacts)
