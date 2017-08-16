@@ -51,7 +51,7 @@ function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num
         # for debugging
         if supp == 0.0
             println("zero supp for: ", node.item_ids)
-            return rules
+            return rules            # NOTE: returning early if zero support
         else
 
         conf = supp/((supp_dict[node.item_ids[lhs_keep]])/num_transacts)
