@@ -42,10 +42,8 @@ end
 # builds up the frequent itemset tree recursively.
 function growtree!(nd::Node, minsupp, k, maxdepth)
     sibs = older_siblings(nd)
-    # println("length sibs: ", length(sibs))
 
     for j = 1:length(sibs)
-        # println("sibs: ", sibs[j].item_ids)
         transacts = nd.transactions .& sibs[j].transactions
         supp = sum(transacts)
 
@@ -53,16 +51,9 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
             items = zeros(Int16, k)
             items[1:k-1] = nd.item_ids[1:k-1]
             items[end] = sibs[j].item_ids[end]
-            # println("new  node: ", items)
+
             child = Node(Int16(j), items, transacts, nd, supp)
             push!(nd.children, child)
-        # # for debugging
-        # else
-        #     items = zeros(Int16, k)
-        #     items[1:k-1] = nd.item_ids[1:k-1]
-        #     items[end] = sibs[j].item_ids[end]
-        #     info("not including because of unmet support: ")
-        #     println(items)
         end
     end
     # Recurse on newly created children
@@ -186,6 +177,9 @@ function frequent(transactions::Array{Array{String, 1}, 1}, minsupp::T, maxdepth
         supp = minsupp
     elseif T == Float64
         supp = floor(Int, minsupp * n)
+        if supp == 0.0
+            warn("Setting support to 0.0, which is probably not intended.")
+        end 
     end
     freq_tree = frequent_item_tree(transactions, uniq_items, supp, maxdepth)
 
