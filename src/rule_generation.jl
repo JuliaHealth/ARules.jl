@@ -50,7 +50,7 @@ function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num
         supp = node.supp/num_transacts
         # for debugging
         if supp == 0.0
-            println("zero supp for: ", node.item_ids)
+            warn("zero supp for: ", node.item_ids)
             return rules            # NOTE: returning early if zero support
         else
 
@@ -69,10 +69,8 @@ end
 
 function gen_rules!(rules::Array{Rule, 1}, node::Node, supp_dict::Dict{Array{Int16, 1}, Int}, k, num_transacts)
     m = length(node.children)
-    # println("Node: ", node.id, " ", node.item_ids, " has $m children")
-    shownodes(node)
+
     for child in node.children
-        println("Running gen_rules!() on node: ", child.item_ids)
         rules_tmp = gen_node_rules(child, supp_dict, k, num_transacts)
         append!(rules, rules_tmp)
         if !isempty(child.children)
@@ -85,7 +83,6 @@ end
 function gen_rules(root::Node, supp_dict::Dict{Array{Int16, 1}, Int}, num_transacts)
     rules = Array{Rule, 1}(0)
     n_kids = length(root.children)
-    println("The root node: ", root.item_ids, " has $n_kids children")
     if n_kids > 0
         for i = 1:n_kids
             gen_rules!(rules, root.children[i], supp_dict, 2, num_transacts)
