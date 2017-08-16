@@ -177,9 +177,10 @@ function frequent(transactions::Array{Array{String, 1}, 1}, minsupp::T, maxdepth
         supp = minsupp
     elseif T == Float64
         supp = floor(Int, minsupp * n)
-        if supp == 0.0
-            warn("Setting support to 0.0, which is probably not intended.")
-        end 
+        if supp == 0
+            warn("Minimum support should not be 0; setting it to 1 now.")
+            supp = 1
+        end
     end
     freq_tree = frequent_item_tree(transactions, uniq_items, supp, maxdepth)
 
