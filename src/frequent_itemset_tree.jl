@@ -118,7 +118,7 @@ The tree is built recursively using calls to the growtree!() function. The
 `minsupp` and `maxdepth` parameters control the minimum support needed for an
 itemset to be called "frequent", and the max depth of the tree, respectively
 """
-function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items, minsupp, maxdepth)
+function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items::Array{String, 1}, minsupp::Float64, maxdepth::Int)
     occ = occurrence(transactions, uniq_items)
 
     # Have to initialize `itms` array like this because type inference
