@@ -122,7 +122,9 @@ function apriori(transactions::Array{Array{String, 1}, 1}, supp::Float64, maxdep
         item_lkup[i] = itm
     end
     minsupp = floor(Int, supp * n)
-    warn("minsupp: ", minsupp)
+    if minsupp == 0.0
+        error("minsupp is equal to 0.0")
+    end 
     freq_tree = frequent_item_tree(transactions, uniq_items, minsupp, maxdepth)
     supp_lkup = gen_support_dict(freq_tree, n)
     rules = gen_rules(freq_tree, supp_lkup, n)

@@ -5,12 +5,9 @@ transactions = [["milk", "eggs", "bread"],
 			    ["bacon", "eggs", "milk", "beer"],
 			    ["bread", "ham", "turkey"],
 			    ["cheese", "ham", "bread", "ketchup"],
-			    ["mustard", "hot dogs", "buns", "hamburger", "cheese", "beer"],
-			    ["milk", "sugar", "eggs"],
-			    ["hamburger", "ketchup", "milk", "beer"],
-			    ["ham", "cheese", "bacon", "eggs"]]
+			    ["mustard", "hot dogs", "buns", "hamburger", "cheese", "beer"]]
 
-freq = frequent(transactions, 1, 7)
+freq = frequent(transactions, 1, 8)
 display(freq)
 
 for x in freq[:itemset]
@@ -19,7 +16,7 @@ end
 
 unq = unique_items(transactions)
 
-node = ARules._frequent(transactions, unq, 0.01, 6)
+node = ARules.frequent_item_tree(transactions, unq, 0.01, 8)
 sup = gen_support_dict(node, 9)
 
 for k in keys(sup)
@@ -27,4 +24,4 @@ for k in keys(sup)
 end
 
 rules = apriori(transactions, 0.1, 4)
-display(rules)
+showall(rules)
