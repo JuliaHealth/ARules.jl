@@ -114,7 +114,15 @@ function rules_to_datatable(rules::Array{Rule, 1}, item_lkup::Dict{Int16, String
 end
 
 
-
+"""
+    apriori(transactions; supp, conf, maxlen)
+Given an array of transactions (a vector of string vectors), this function runs the a-priori
+algorithm for generating frequent item sets. These frequent items are then used to generate
+association rules. The `supp` argument allows us to stipulate the minimum support
+required for an itemset to be considered frequent. The `conf` argument allows us to exclude
+association rules without at least `conf` level of confidence. The `maxlen` argument stipulates
+the maximum length of an association rule (i.e., total items on left- and right-hand sides)
+"""
 function apriori(transactions::Array{Array{String, 1}, 1}; supp::Float64 = 0.01, conf = 0.8, maxlen::Int = 5)
     n = length(transactions)
     uniq_items = unique_items(transactions)

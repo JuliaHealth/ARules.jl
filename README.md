@@ -53,10 +53,7 @@ julia> rules = apriori(transactions, supp = 0.01, conf = 0.1, maxlen = 6)
 
 
 
-
-
-
-
-## 3. Association Rule Generation
-
-## N. To Do
+## 4. To Do
+- Implement additional frequent-itemset generation algorithms (e.g., eclat, fp-growth)
+- Add functionality for requiring rules to contain a certain item (or items)
+- Improve performance
