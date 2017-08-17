@@ -115,7 +115,7 @@ end
 
 
 
-function apriori(transactions::Array{Array{String, 1}, 1}, supp::Float64, conf, maxdepth::Int)
+function apriori(transactions::Array{Array{String, 1}, 1}; supp::Float64 = 0.01, conf = 0.8, maxlen::Int = 5)
     n = length(transactions)
     uniq_items = unique_items(transactions)
     item_lkup = Dict{Int16, String}()
@@ -126,7 +126,7 @@ function apriori(transactions::Array{Array{String, 1}, 1}, supp::Float64, conf, 
     if minsupp == 0
         minsupp += 1
     end
-    freq_tree = frequent_item_tree(transactions, uniq_items, minsupp, maxdepth)
+    freq_tree = frequent_item_tree(transactions, uniq_items, minsupp, maxlen)
     supp_lkup = gen_support_dict(freq_tree, n)
     rules = gen_rules(freq_tree, supp_lkup, n, conf)
     rules_dt = rules_to_datatable(rules, item_lkup)
