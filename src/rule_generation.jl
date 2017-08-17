@@ -38,7 +38,7 @@ end
 
 # Given a single node in a frequent item tree, this function generates all the
 # rules for that node. This does not include rules for the node's children.
-function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num_transacts)
+function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num_transacts, minconf)
     lhs_keep = trues(k)
     rules = Array{Rule, 1}(0)
     for i = 1:k
@@ -53,39 +53,40 @@ function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num
             warn("zero supp for: ", node.item_ids)
             return rules            # NOTE: returning early if zero support
         else
+            conf = supp/((supp_dict[node.item_ids[lhs_keep]])/num_transacts)
+            if conf ≥ minconf
+                rhs_keep = .!lhs_keep
+                q = first(node.item_ids[rhs_keep])
+                lift = conf/((supp_dict[node.item_ids[rhs_keep]])/num_transacts)
 
-        conf = supp/((supp_dict[node.item_ids[lhs_keep]])/num_transacts)
-        rhs_keep = .!lhs_keep
-        q = first(node.item_ids[rhs_keep])
-        lift = conf/((supp_dict[node.item_ids[rhs_keep]])/num_transacts)
-
-        rule = Rule(p, q, supp, conf, lift)
-        push!(rules, rule)
+                rule = Rule(p, q, supp, conf, lift)
+                push!(rules, rule)
+            end
         end
     end
     rules
 end
 
 
-function gen_rules!(rules::Array{Rule, 1}, node::Node, supp_dict::Dict{Array{Int16, 1}, Int}, k, num_transacts)
+function gen_rules!(rules::Array{Rule, 1}, node::Node, supp_dict::Dict{Array{Int16, 1}, Int}, k, num_transacts, minconf)
     m = length(node.children)
 
     for child in node.children
-        rules_tmp = gen_node_rules(child, supp_dict, k, num_transacts)
+        rules_tmp = gen_node_rules(child, supp_dict, k, num_transacts, minconf)
         append!(rules, rules_tmp)
         if !isempty(child.children)
-            gen_rules!(rules, child, supp_dict, k+1, num_transacts)
+            gen_rules!(rules, child, supp_dict, k+1, num_transacts, minconf)
         end
     end
 end
 
 
-function gen_rules(root::Node, supp_dict::Dict{Array{Int16, 1}, Int}, num_transacts)
+function gen_rules(root::Node, supp_dict::Dict{Array{Int16, 1}, Int}, num_transacts, minconf)
     rules = Array{Rule, 1}(0)
     n_kids = length(root.children)
     if n_kids > 0
         for i = 1:n_kids
-            gen_rules!(rules, root.children[i], supp_dict, 2, num_transacts)
+            gen_rules!(rules, root.children[i], supp_dict, 2, num_transacts, minconf)
         end
     end
     rules
@@ -114,7 +115,7 @@ end
 
 
 
-function apriori(transactions::Array{Array{String, 1}, 1}, supp::Float64, maxdepth::Int)
+function apriori(transactions::Array{Array{String, 1}, 1}, supp::Float64, conf, maxdepth::Int)
     n = length(transactions)
     uniq_items = unique_items(transactions)
     item_lkup = Dict{Int16, String}()
@@ -127,7 +128,7 @@ function apriori(transactions::Array{Array{String, 1}, 1}, supp::Float64, maxdep
     end
     freq_tree = frequent_item_tree(transactions, uniq_items, minsupp, maxdepth)
     supp_lkup = gen_support_dict(freq_tree, n)
-    rules = gen_rules(freq_tree, supp_lkup, n)
+    rules = gen_rules(freq_tree, supp_lkup, n, conf)
     rules_dt = rules_to_datatable(rules, item_lkup)
     return rules_dt
 end
