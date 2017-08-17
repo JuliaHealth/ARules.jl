@@ -12,7 +12,7 @@ m = 20               # NOTE: most impactful for runtime complexity (num. items i
 mx_depth = 10        # max depth of itemset tree (max size of transactions explored)
 t = [sample(itemlist, m, replace = false) for _ in 1:n];
 
-# @code_warntype _frequent(t, 1)
+
 unq = unique_items(t);
 @test typeof(unq) == Array{String, 1}
 
@@ -37,11 +37,11 @@ t2 = [["a", "b"],
      ["a", "b", "c"],
      ["c", "b", "e", "f"]]
 
-unq2 = get_unique_items(t2)
+unq2 = unique_items(t2)
 @test length(unq2) == 6
 
 
-xtree2 = _frequent(t2, unq2, 1, 4);
+xtree2 = frequent_item_tree(t2, unq2, 1, 4);
 xsup = gen_support_dict(xtree2, length(t2))
 @test length(xsup) == 27
 @test typeof(xsup) == Dict{Array{Int16,1}, Int64}

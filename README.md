@@ -52,8 +52,10 @@ julia> rules = apriori(transactions, supp = 0.01, conf = 0.1, maxlen = 6)
 ```
 
 
+## 4. Note
+This package is under active development. And as such, there are still many performance and feature improvements to be made. In the case of performance, while the package will handle many applications quite well, once the number of "items" in "transactions" becomes large, there is a marked performance penalty. 
 
-## 4. To Do
+## 5. To Do
 - Implement additional frequent-itemset generation algorithms (e.g., eclat, fp-growth)
 - Add functionality for requiring rules to contain a certain item (or items)
 - Improve performance
