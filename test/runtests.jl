@@ -19,10 +19,10 @@ unq = unique_items(t);
 occ = occurrence(t, unq);
 @test typeof(occ) == BitArray{2}
 
-@time xtree1 = frequent_item_tree(t, unq, round(Int, 0.01*n), mx_depth);
+xtree1 = frequent_item_tree(t, unq, round(Int, 0.01*n), mx_depth);
 @test typeof(xtree1) == Node
 
-@time rules = apriori(t, supp = 0.01, conf = 0.1, maxlen = mx_depth);
+rules = apriori(t, supp = 0.01, conf = 0.1, maxlen = mx_depth);
 
 
 
