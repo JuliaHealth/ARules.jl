@@ -5,31 +5,35 @@ using Base.Test
 # write your own tests here
 
 
-itemlist = randstr(25, 16);
+itemlist = randstr(100, 16);
 
-n = 100
-m = 10              # number of items in transactions
-mx_depth = 5        # max depth of itemset tree (max size of transactions explored)
+n = 100_000
+m = 20               # NOTE: most impactful for runtime complexity (num. items in transactions)
+mx_depth = 10        # max depth of itemset tree (max size of transactions explored)
 t = [sample(itemlist, m, replace = false) for _ in 1:n];
 
 # @code_warntype _frequent(t, 1)
-unq = get_unique_items(t);
+unq = unique_items(t);
 @test typeof(unq) == Array{String, 1}
 
 occ = occurrence(t, unq);
 @test typeof(occ) == BitArray{2}
 
-xtree1 = _frequent(t, unq, round(Int, 0.01*n), mx_depth);
+@time xtree1 = frequent_item_tree(t, unq, round(Int, 0.01*n), mx_depth);
 @test typeof(xtree1) == Node
 
+@time rules = apriori(t, supp = 0.01, conf = 0.1, maxlen = mx_depth);
 
 
-t2 = [["a", "b"], 
-     ["b", "c", "d"], 
+
+
+
+t2 = [["a", "b"],
+     ["b", "c", "d"],
      ["a", "c"],
-     ["e", "b"], 
-     ["a", "c", "d"], 
-     ["a", "e"], 
+     ["e", "b"],
+     ["a", "c", "d"],
+     ["a", "e"],
      ["a", "b", "c"],
      ["c", "b", "e", "f"]]
 
@@ -48,7 +52,7 @@ xrules = gen_node_rules(xtree2.children[1], xsup, 3, 8)
 
 rule_arr = Array{Rule, 1}(0)
 gen_rules!(rule_arr, xtree2.children[1], xsup, 2, 8)
-@test eltype(rule_arr) == Rule  
+@test eltype(rule_arr) == Rule
 @test length(rule_arr) == 14
 
 
@@ -57,9 +61,9 @@ a_list = [
     ["a", "b"],
     ["a", "c"],
     ["a", "b", "c"],
-    ["a", "b", "d"], 
-    ["a", "c", "d"], 
-    ["a", "b", "c", "d"],    
+    ["a", "b", "d"],
+    ["a", "c", "d"],
+    ["a", "b", "c", "d"],
     ["a", "b", "c", "e"],
     ["b", "d", "e", "f"],
     ["a", "c", "e", "f"],

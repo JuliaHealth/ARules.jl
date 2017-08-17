@@ -12,12 +12,12 @@ julia> Pkg.clone("https://github.com/bcbi/ARules.jl")
 ```
 
 ## 2. Frequent Itemset Generation
-The `frequent()` function can be used to obtain frequent itemsets using the 
-_a priori_ algorithm. The second and third arguments allow us to control the 
-minimum support threshold (either as a count or proportion) and the maximum 
+The `frequent()` function can be used to obtain frequent itemsets using the
+_a priori_ algorithm. The second and third arguments allow us to control the
+minimum support threshold (either as a count or proportion) and the maximum
 size of itemset to consider, respectively.
 ```julia
-julia> using ARules 
+julia> using ARules
 
 julia> transactions = [["milk", "eggs", "bread"],
                        ["butter", "milk", "sugar", "flour", "eggs"],
@@ -33,9 +33,9 @@ julia> frequent(transactions, 2, 6)				# uses a-priori algorithm
 ```
 
 ## 3. Association Rule Generation
-The `apriori()` function can be used to obtain association rules. 
+The `apriori()` function can be used to obtain association rules.
 ```julia
-julia> using ARules 
+julia> using ARules
 
 julia> transactions = [["milk", "eggs", "bread"],
                        ["butter", "milk", "sugar", "flour", "eggs"],
@@ -48,7 +48,7 @@ julia> transactions = [["milk", "eggs", "bread"],
                        ["ham", "cheese", "bacon", "eggs"]]
 
 
-julia> rules = apriori(transactions, 0.01, 6)
+julia> rules = apriori(transactions, supp = 0.01, conf = 0.1, maxlen = 6)
 ```
 
 
