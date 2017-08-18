@@ -51,7 +51,7 @@ xrules = gen_node_rules(xtree2.children[1].children[1].children[1], xsup, 3, 8, 
 
 
 rule_arr = Array{Rule, 1}(0)
-gen_rules!(rule_arr, xtree2.children[1], xsup, 2, 8)
+gen_rules!(rule_arr, xtree2.children[1], xsup, 2, 8, 0.1)
 @test eltype(rule_arr) == Rule
 @test length(rule_arr) == 14
 
