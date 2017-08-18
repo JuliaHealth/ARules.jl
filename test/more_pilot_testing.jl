@@ -1,5 +1,6 @@
 using ARules
 
+
 transactions = [["milk", "eggs", "bread"],
 			    ["butter", "milk", "sugar", "flour", "eggs"],
 			    ["bacon", "eggs", "milk", "beer"],
