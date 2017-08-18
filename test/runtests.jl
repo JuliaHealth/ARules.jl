@@ -77,4 +77,20 @@ xtree3 = frequent_item_tree(a_list, xunq3, 1, 6);
 xsup3 = gen_support_dict(xtree3, length(a_list))
 
 
-rules = apriori(a_list, supp = 0.01, conf = 0.1, maxlen = 6)
+rules = apriori(a_list, supp = 0.01, conf = 0.01, maxlen = 6)
+
+
+
+
+transactions = [["milk", "eggs", "bread"],
+			    ["butter", "milk", "sugar", "flour", "eggs"],
+			    ["bacon", "eggs", "milk", "beer"],
+			    ["bread", "ham", "turkey"],
+			    ["cheese", "ham", "bread", "ketchup"],
+			    ["mustard", "hot dogs", "buns", "hamburger", "cheese", "beer"]]
+
+freq = frequent(transactions, 1, 8)
+
+
+rules = apriori(transactions, supp = 0.01, conf = 0.01, maxlen = 6)
+@test size(rules) == (329, 5)
