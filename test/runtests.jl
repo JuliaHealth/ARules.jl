@@ -46,7 +46,7 @@ xsup = gen_support_dict(xtree2, length(t2))
 @test length(xsup) == 27
 @test typeof(xsup) == Dict{Array{Int16,1}, Int64}
 
-xrules = gen_node_rules(xtree2.children[1], xsup, 3, 0.1, 8)
+xrules = gen_node_rules(xtree2.children[1], xsup, 3, 8, 0.1)
 @test length(xrules) == 3
 
 

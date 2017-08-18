@@ -16,12 +16,12 @@ end
 
 unq = unique_items(transactions)
 
-node = ARules.frequent_item_tree(transactions, unq, 0.01, 8)
+node = ARules.frequent_item_tree(transactions, unq, 1, 8)
 sup = gen_support_dict(node, 9)
 
 for k in keys(sup)
     println(k)
 end
 
-rules = apriori(transactions, 0.1, 4)
+rules = apriori(transactions, supp = 0.01, conf = 0.01, maxlen = 6)
 showall(rules)
