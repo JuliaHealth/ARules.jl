@@ -76,4 +76,4 @@ xunq3 = unique_items(a_list)
 xtree3 = frequent_item_tree(a_list, xunq3, 1, 6);
 xsup3 = gen_support_dict(xtree3, length(a_list))
 
-rules = apriori(a_list, suup = 0.01, conf = 0.1, maxlen = 6)
+rules = apriori(a_list, sup = 0.01, conf = 0.1, maxlen = 6)
