@@ -1,21 +1,21 @@
 using StatsBase
 using DataTables
 
-mutable struct Node
-    id::Int16
-    item_ids::Array{Int16,1}
+struct Node
+    id::Int8
+    item_ids::Array{Int8,1}
     transactions::BitArray{1}
     children::Array{Node,1}
     mother::Node
     supp::Int
 
-    function Node(id::Int16, item_ids::Array{Int16,1}, transactions::BitArray{1})
+    function Node(id::Int8, item_ids::Array{Int8,1}, transactions::BitArray{1})
         children = Array{Node,1}(0)
         nd = new(id, item_ids, transactions, children)
         return nd
     end
 
-    function Node(id::Int16, item_ids::Array{Int16,1}, transactions::BitArray{1}, mother::Node, supp::Int)
+    function Node(id::Int8, item_ids::Array{Int8,1}, transactions::BitArray{1}, mother::Node, supp::Int)
         children = Array{Node,1}(0)
         nd = new(id, item_ids, transactions, children, mother, supp)
         return nd
@@ -48,11 +48,11 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
         supp = sum(transacts)
 
         if supp ≥ minsupp
-            items = zeros(Int16, k)
+            items = zeros(Int8, k)
             items[1:k-1] = nd.item_ids[1:k-1]
             items[end] = sibs[j].item_ids[end]
 
-            child = Node(Int16(j), items, transacts, nd, supp)
+            child = Node(Int8(j), items, transacts, nd, supp)
             push!(nd.children, child)
         end
     end
@@ -114,9 +114,9 @@ function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items
 
     # Have to initialize `itms` array like this because type inference
     # seems to be broken for this otherwise (using v0.6.0)
-    itms = Array{Int16,1}(1)
+    itms = Array{Int8,1}(1)
     itms[1] = -1
-    id = Int16(1)
+    id = Int8(1)
     transacts = BitArray(0)
     root = Node(id, itms, transacts)
     n_items = length(uniq_items)
@@ -125,7 +125,7 @@ function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items
     for j = 1:n_items
         supp = sum(occ[:, j])
         if supp ≥ minsupp
-            nd = Node(Int16(j), Int16[j], occ[:, j], root, supp)
+            nd = Node(Int8(j), Int8[j], occ[:, j], root, supp)
             push!(root.children, nd)
         end
     end
@@ -164,12 +164,12 @@ end
 This function just acts as a bit of a convenience function that returns the frequent
 item sets and their support count (integer) when given and array of transactions. It
 basically just wraps frequent_item_tree() but gives back the plain text of the items, rather than
-that Int16 representation.
+that Int8 representation.
 """
 function frequent(transactions::Array{Array{String, 1}, 1}, minsupp::T, maxdepth) where T <: Real
     n = length(transactions)
     uniq_items = unique_items(transactions)
-    item_lkup = Dict{Int16, String}()
+    item_lkup = Dict{Int8, String}()
     for (i, itm) in enumerate(uniq_items)
         item_lkup[i] = itm
     end
