@@ -1,7 +1,7 @@
 using StatsBase
 using DataTables
 
-struct Node
+mutable struct Node
     id::Int16
     item_ids::Array{Int16,1}
     transactions::BitArray{1}
