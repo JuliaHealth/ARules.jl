@@ -62,6 +62,7 @@ function growtree!(nd::Node, minsupp, k, maxdepth, node_idx, node_arr)
             end
             println("post-map address ", pointer_from_objref(node_arr[n_nodes].transactions))
             println("post-map sum ", sum(node_arr[n_nodes].transactions))
+            println("post-map outer sum ", sum(transacts))
         end
     end
     # Recurse on newly created children
