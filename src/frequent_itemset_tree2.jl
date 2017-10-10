@@ -131,7 +131,7 @@ function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items
 
     # Grow nodes in breadth-first manner
     for j = 1:n_kids
-        growtree!(node_arr[1].children[j], minsupp, 2, maxdepth)
+        growtree!(node_arr[node_arr[1].children[j]], minsupp, 2, maxdepth)
     end
     root
 end
