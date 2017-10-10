@@ -1,4 +1,4 @@
-# SUPP_COUNT = Dict{Array{Int16, 1}, Int}
+SUPP_COUNT = Dict{Array{Int16, 1}, Int}
 
 
 struct Node
@@ -44,25 +44,18 @@ function growtree!(nd::Node, minsupp, k, maxdepth, node_idx, node_arr)
     for j = 1:length(sibs)
         transacts = nd.transactions .& node_arr[sibs[j]].transactions
         supp = sum(transacts)
-        println("outer: ", pointer_from_objref(transacts))
+
         if supp ≥ minsupp
             items = zeros(Int16, k)
-            items[1:k-1] = node_arr[node_idx].item_ids[1:k-1]
+            for i = 1:(k - 1)
+                items[i] = node_arr[node_idx].item_ids[i]
+            end
             items[end] = node_arr[sibs[j]].item_ids[end]
 
             child = Node(items, transacts, node_idx, supp)
-
             n_nodes += 1
             push!(node_arr, child)          # add child node to master node array
             push!(nd.children, n_nodes)     # n_nodes is the child's node index
-            println("pre-map address ", pointer_from_objref(node_arr[n_nodes].transactions))
-            println("pre-map sum ", sum(node_arr[n_nodes].transactions))
-
-            node_arr[n_nodes].transactions = map(x -> false, node_arr[n_nodes].transactions)
-
-            println("post-map address ", pointer_from_objref(node_arr[n_nodes].transactions))
-            println("post-map sum ", sum(node_arr[n_nodes].transactions))
-            println("post-map outer sum ", sum(transacts))
         end
     end
     # Recurse on newly created children
