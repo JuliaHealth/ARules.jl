@@ -56,7 +56,9 @@ function growtree!(nd::Node, minsupp, k, maxdepth, node_idx, node_arr)
             push!(node_arr, child)          # add child node to master node array
             push!(nd.children, n_nodes)     # n_nodes is the child's node index
             println("pre-map address ", pointer_from_objref(node_arr[n_nodes].transactions))
-            node_arr[n_nodes].transactions = map(x -> false, node_arr[n_nodes].transactions)
+            for i = 1:length(node_arr[n_nodes].transactions)
+                node_arr[n_nodes].transactions[i] = false
+            end 
             println("post-map address ", pointer_from_objref(node_arr[n_nodes].transactions))
         end
     end
