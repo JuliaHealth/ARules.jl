@@ -51,10 +51,11 @@ function growtree!(nd::Node, minsupp, k, maxdepth, node_idx, node_arr)
             items[end] = node_arr[sibs[j]].item_ids[end]
 
             child = Node(items, transacts, node_idx, supp)
-            println("inner: ", pointer_from_objref(child.transactions))
+
             n_nodes += 1
             push!(node_arr, child)          # add child node to master node array
             push!(nd.children, n_nodes)     # n_nodes is the child's node index
+            println("inner: ", pointer_from_objref(node_arr[n_nodes].transactions))
         end
     end
     # Recurse on newly created children
