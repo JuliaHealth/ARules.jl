@@ -1,4 +1,4 @@
-SUPP_COUNT = Dict{Array{Int16, 1}, Int}
+# SUPP_COUNT = Dict{Array{Int16, 1}, Int}
 
 
 mutable struct Node
@@ -44,13 +44,14 @@ function growtree!(nd::Node, minsupp, k, maxdepth, node_idx, node_arr)
     for j = 1:length(sibs)
         transacts = nd.transactions .& node_arr[sibs[j]].transactions
         supp = sum(transacts)
-
+        println("outer: ", $(pointer(transacts)))
         if supp ≥ minsupp
             items = zeros(Int16, k)
             items[1:k-1] = node_arr[node_idx].item_ids[1:k-1]
             items[end] = node_arr[sibs[j]].item_ids[end]
 
             child = Node(items, transacts, node_idx, supp)
+            println("inner: ", $(pointer(child.transacts)))
             n_nodes += 1
             push!(node_arr, child)          # add child node to master node array
             push!(nd.children, n_nodes)     # n_nodes is the child's node index
