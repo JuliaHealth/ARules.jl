@@ -7,7 +7,7 @@ export Node, Rule, apriori, frequent, unique_items, shownodes,
        gen_rules!, gen_rules, gen_node_rules, occurrence
 
 
-include("frequent_itemset_tree.jl")
+include("frequent_itemset_tree2.jl")
 include("utils.jl")
 include("rule_generation.jl")
 
