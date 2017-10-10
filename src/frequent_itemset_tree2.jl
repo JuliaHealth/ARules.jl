@@ -125,6 +125,7 @@ function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items
         if supp ≥ minsupp
             nd = Node(Int16[j], occ[:, j], 1, supp)
             push!(node_arr[1].children, j+1)
+            push!(node_arr, nd)
         end
     end
     n_kids = length(node_arr[1].children)
