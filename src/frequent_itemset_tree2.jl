@@ -7,20 +7,20 @@ struct Node
     children::Array{Int, 1}
     mother::Int
     supp::Int
-end
 
-# Strictly for the root nodes
-function Node(item_ids::Array{Int16, 1}, transactions::BitArray{1})
-    children = Array{Node, 1}(0)
-    nd = Node(item_ids, transactions, children)
-    return nd
-end
+    # Strictly for the root nodes
+    function Node(item_ids::Array{Int16, 1}, transactions::BitArray{1})
+        children = Array{Node, 1}(0)
+        nd = new(item_ids, transactions, children)
+        return nd
+    end
 
 
-function Node(item_ids::Array{Int16, 1}, transactions::BitArray{1}, mother::Int, supp::Int)
-    children = Array{Node, 1}(0)
-    nd = Node(item_ids, transactions, children, mother, supp)
-    return nd
+    function Node(item_ids::Array{Int16, 1}, transactions::BitArray{1}, mother::Int, supp::Int)
+        children = Array{Node, 1}(0)
+        nd = new(item_ids, transactions, children, mother, supp)
+        return nd
+    end
 end
 
 
