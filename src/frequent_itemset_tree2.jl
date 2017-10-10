@@ -115,7 +115,8 @@ function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items
     itms = Array{Int16,1}(1)
     itms[1] = -1
     transacts = BitArray(0)
-    root = Node(itms, transacts)
+    node_arr = Array{Node, 1}(1)
+    node_arr[1] = Node(itms, transacts)
     n_items = length(uniq_items)
 
     # This loop creates 1-item nodes (i.e., first children)
@@ -123,14 +124,14 @@ function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items
         supp = sum(occ[:, j])
         if supp ≥ minsupp
             nd = Node(Int16[j], occ[:, j], 1, supp)
-            push!(root.children, j+1)
+            push!(node_arr[1].children, j+1)
         end
     end
-    n_kids = length(root.children)
+    n_kids = length(node_arr[1].children)
 
     # Grow nodes in breadth-first manner
     for j = 1:n_kids
-        growtree!(root.children[j], minsupp, 2, maxdepth)
+        growtree!(node_arr[1].children[j], minsupp, 2, maxdepth)
     end
     root
 end
