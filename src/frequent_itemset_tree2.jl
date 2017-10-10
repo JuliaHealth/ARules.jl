@@ -57,9 +57,9 @@ function growtree!(nd::Node, minsupp, k, maxdepth, node_idx, node_arr)
             push!(nd.children, n_nodes)     # n_nodes is the child's node index
             println("pre-map address ", pointer_from_objref(node_arr[n_nodes].transactions))
             println("pre-map sum ", sum(node_arr[n_nodes].transactions))
-            for i = 1:length(node_arr[n_nodes].transactions)
-                node_arr[n_nodes].transactions[i] = false
-            end
+
+            node_arr[n_nodes].transactions = map(x -> false, node_arr[n_nodes].transactions)
+
             println("post-map address ", pointer_from_objref(node_arr[n_nodes].transactions))
             println("post-map sum ", sum(node_arr[n_nodes].transactions))
             println("post-map outer sum ", sum(transacts))
