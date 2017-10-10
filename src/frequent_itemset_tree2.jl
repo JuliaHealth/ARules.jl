@@ -1,7 +1,7 @@
 # SUPP_COUNT = Dict{Array{Int16, 1}, Int}
 
 
-mutable struct Node
+struct Node
     item_ids::Array{Int16, 1}
     transactions::BitArray{1}
     children::Array{Int, 1}
