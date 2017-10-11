@@ -44,7 +44,7 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
     sibs = older_siblings(nd)
 
     for j = 1:length(sibs)
-        transacts = nd.transactions .& sibs[j].transactions
+        transacts = nd.transactions .& view(sibs, j).transactions
         supp = sum(transacts)
 
         if supp ≥ minsupp

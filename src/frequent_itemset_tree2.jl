@@ -42,7 +42,7 @@ function growtree!(nd::Node, minsupp, k, maxdepth, node_idx, node_arr)
     sibs = older_siblings(nd, node_arr, node_idx)     # sibs is vector of indices
 
     for j = 1:length(sibs)
-        transacts = nd.transactions .& nd.transactions #node_arr[sibs[j]].transactions
+        transacts = nd.transactions .& node_arr[sibs[j]].transactions
         supp = sum(transacts)
 
         if supp ≥ minsupp
