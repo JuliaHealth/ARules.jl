@@ -68,6 +68,20 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
 end
 
 
+function unique_items{M}(transactions::Array{Array{M, 1}, 1})
+    dict = Dict{M, Bool}()
+
+    for t in transactions
+        for i in t
+            dict[i] = true
+        end
+    end
+    uniq_items = collect(keys(dict))
+    return sort(uniq_items)
+end
+
+
+
 
 
 # This function is used internally by the frequent() function to create the
