@@ -15,7 +15,7 @@ struct Node
 
     function Node(id::Int16, item_ids::Array{Int16,1}, transact_ids::Array{Int, 1}, mother::Node)
         children = Array{Node,1}(0)
-        nd = new(id, item_ids, transactions, children, mother)
+        nd = new(id, item_ids, transact_ids, children, mother)
         return nd
     end
 end
