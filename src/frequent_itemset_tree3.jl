@@ -43,10 +43,10 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
     sibs = older_siblings(nd)
 
     for j = 1:length(sibs)
-        transacts_ids = intersect(nd.transact_ids, sibs[j].transact_ids)
+        transact_ids = intersect(nd.transact_ids, sibs[j].transact_ids)
 
 
-        if length(transacts_ids) ≥ minsupp
+        if length(transact_ids) ≥ minsupp
             items = zeros(Int16, k)
             for i = 1:(k - 1)
                 items[i] = nd.item_ids[i]
