@@ -126,7 +126,7 @@ function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items
     # This loop creates 1-item nodes (i.e., first children)
     for j = 1:n_items
         transact_ids = find(occ[:, j])
-        if supp ≥ minsupp
+        if length(transact_ids) ≥ minsupp
             nd = Node(Int16(j), Int16[j], transact_ids, root)
             push!(root.children, nd)
         end
