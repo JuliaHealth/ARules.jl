@@ -1,4 +1,6 @@
-
+# This approach tries to use the set intersection of
+# transaction IDs to compute the support. The bitarrays
+# approach is many times faster.
 
 struct Node
     id::Int16

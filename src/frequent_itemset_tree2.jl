@@ -1,3 +1,8 @@
+# This implementation uses an array to store nodes, rather
+# than a recursive tree approach used in the origin version.
+# This approach appears to produce identical results as the 
+# original recursive nodes approach.
+
 
 struct Node
     item_ids::Array{Int16, 1}
