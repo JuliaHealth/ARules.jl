@@ -1,5 +1,3 @@
-SUPP_COUNT = Dict{Array{Int16, 1}, Int}
-
 
 struct Node
     item_ids::Array{Int16, 1}
