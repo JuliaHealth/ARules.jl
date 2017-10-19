@@ -1,3 +1,7 @@
+# This implements the first attempt at using bitarrays for
+# storing and propagating the itemset information at each node
+
+
 using StatsBase
 using DataTables
 
