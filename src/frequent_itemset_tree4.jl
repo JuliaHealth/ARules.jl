@@ -1,3 +1,8 @@
+# This version implements Isabel's idea of only storing
+# transaction ID information, and using that to propagate
+# information down the nodes of the tree. So only the
+# single-item nodes have the actual transaction bitarrays.
+
 
 struct Node
     id::Int16
@@ -6,14 +11,23 @@ struct Node
     children::Array{Node, 1}
     mother::Node
     supp::Int
+    transactions::BitArray{1}  # only for single-item nodes
 
-    function Node(id::Int16, item_ids::Array{Int16,1}, transact_ids::BitArray{1})
-        children = Array{Node,1}(0)
+    function Node(id::Int16, item_ids::Array{Int16,1}, transactions::Array{Int, 1})
+        transact_ids = find(transactions)
+        children = Array{Node, 1}(0)
         nd = new(id, item_ids, transact_ids, children)
+        nd.transactions = transactions
         return nd
     end
 
-    function Node(id::Int16, item_ids::Array{Int16,1}, transact_ids::BitArray{1}, mother::Node, supp::Int)
+    function Node(id::Int16, item_ids::Array{Int16,1}, transact_ids::Array{Int, 1}, mother::Node, supp::Int)
+        children = Array{Node,1}(0)
+        nd = new(id, item_ids, transact_ids, children, mother, supp)
+        return nd
+    end
+
+    function Node(id::Int16, item_ids::Array{Int16, 1}, transact_ids::SubArray{Int64,1,Array{Int64,1},Tuple{UnitRange{Int64},Int64},true}, mother::Node, supp::Int)
         children = Array{Node,1}(0)
         nd = new(id, item_ids, transact_ids, children, mother, supp)
         return nd
@@ -42,8 +56,15 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
     sibs = older_siblings(nd)
 
     for j = 1:length(sibs)
-        transacts = nd.transactions .& sibs[j].transactions
-        supp = sum(transacts)
+
+        # TODO: This is where the magic needs to happen.
+        #       We need `transact_ids` to be computed using
+        #       only views all the way back to the original
+        #       single-item nodes.
+        transact_ids = view(nd.transactions, sibs[j].transact_ids)
+
+
+        supp = length(transacts)
 
         if supp ≥ minsupp
             items = zeros(Int16, k)
