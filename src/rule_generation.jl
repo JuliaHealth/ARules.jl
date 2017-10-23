@@ -140,3 +140,30 @@ function apriori(transactions::Array{Array{String, 1}, 1}; supp::Float64 = 0.01,
     rules_dt = rules_to_datatable(rules, item_lkup)
     return rules_dt
 end
+
+
+"""
+apriori(occurrences, item_lkup; supp, conf, maxlen)
+
+Given an boolean occurrence matrix of transactions (rows are transactions, columns are items) and 
+a lookup dictionary of column-index to items-string, this function runs the a-priori
+algorithm for generating frequent item sets. These frequent items are then used to generate
+association rules. The `supp` argument allows us to stipulate the minimum support
+required for an itemset to be considered frequent. The `conf` argument allows us to exclude
+association rules without at least `conf` level of confidence. The `maxlen` argument stipulates
+the maximum length of an association rule (i.e., total items on left- and right-hand sides)
+"""
+function apriori(occurrences::BitArray{2}, item_lkup::T; supp::Float64 = 0.01, conf = 0.8, maxlen::Int = 5) where {T<:Associative{String, Int16}}
+    n = size(occurrences, 1)
+    minsupp = floor(Int, supp * n)
+    if minsupp == 0
+        minsupp = 1
+    end
+    freq_tree = frequent_item_tree(occurrences, collect(keys(item_lkup)), minsupp, maxlen)
+    supp_lkup = gen_support_dict(freq_tree, n)
+    rules = gen_rules(freq_tree, supp_lkup, n, conf)
+    # should the input lookup dict be reversed? having the keys be the strings enforces uniqueness, but
+    # requires reversing before following function
+    rules_dt = rules_to_datatable(rules, Dict(zip(values(item_lkup), keys(item_lkup))))
+    return rules_dt
+end

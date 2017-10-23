@@ -142,6 +142,42 @@ function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items
     root
 end
 
+"""
+frequent_item_tree(occurrences, minsupp, maxdepth)
+
+This function creates a frequent itemset tree from an occurrence matrix.
+The tree is built recursively using calls to the growtree!() function. The
+`minsupp` and `maxdepth` parameters control the minimum support needed for an
+itemset to be called "frequent", and the max depth of the tree, respectively
+"""
+function frequent_item_tree(occ::BitArray{2}, uniq_items::Array{String, 1}, minsupp::Int, maxdepth::Int)
+
+    # Have to initialize `itms` array like this because type inference
+    # seems to be broken for this otherwise (using v0.6.0)
+    itms = Array{Int16,1}(1)
+    itms[1] = -1
+    id = Int16(1)
+    transacts = BitArray(0)
+    root = Node(id, itms, transacts)
+    n_items = length(uniq_items)
+
+    # This loop creates 1-item nodes (i.e., first children)
+    for j = 1:n_items
+        supp = sum(occ[:, j])
+        if supp ≥ minsupp
+            nd = Node(Int16(j), Int16[j], occ[:, j], root, supp)
+            push!(root.children, nd)
+        end
+    end
+    n_kids = length(root.children)
+
+    # Grow nodes in breadth-first manner
+    for j = 1:n_kids
+        growtree!(root.children[j], minsupp, 2, maxdepth)
+    end
+    root
+end
+
 
 function suppdict_to_datatable(supp_lkup, item_lkup)
     n_sets = length(supp_lkup)
