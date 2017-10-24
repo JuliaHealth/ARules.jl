@@ -229,3 +229,177 @@ function frequent(transactions::Array{Array{String, 1}, 1}, minsupp::T, maxdepth
     freq = suppdict_to_datatable(supp_lkup, item_lkup)
     return freq
 end
+
+
+####################
+
+
+struct Node4
+    item_ids::Array{Int16, 1}
+    transact_ids::Array{Int,1}
+    supp::Int
+
+    # #constructor for root_node
+    # function Node4(item_ids::Array{Int16,1}, transactions::T, supp::Int64) where {T<:SubArray{Bool, 1}}
+    #     transact_ids = find(transactions)
+    #     nd = new(item_ids, transact_ids, supp)
+    #     return nd
+    # end
+
+    #constructor
+    function Node4(item_ids::Array{Int16,1}, transact_ids::Array{Int,1}, supp::Int)
+        nd = new(item_ids, transact_ids, supp)
+        return nd
+    end
+
+end
+
+# This function is used internally and is the workhorse of the frequent()
+# function, which generates a frequent itemset tree. The growtree!() function
+# builds up the frequent itemset tree recursively.
+function growtree4!(node_dict::Dict{Int16, Vector{Vector{Node4}}}, occ::BitArray{2}, array_idx::Int, level::Int, minsupp::Int)
+    
+    nitems = length(node_dict[level-1][array_idx]) 
+    node_dict[level] = Vector{Vector{Node4}}()
+    for item_idx = 1:nitems
+        #transaction ids for this node
+        push!(node_dict[level], Vector{Node4}())
+        node_item_ids = node_dict[level - 1][array_idx][item_idx].item_ids
+        node_ti = node_dict[level - 1][array_idx][item_idx].transact_ids
+
+        for sib_idx = item_idx:nitems
+             sib_item_id = node_dict[level - 1][array_idx][sib_idx].item_ids[end]
+             join_transacts = view(occ, node_ti, sib_item_id) #occ[node_ti, sib_item_id]
+             join_ti = node_ti[join_transacts] #view(node_ti, join_transacts)
+             supp = length(join_ti)
+             if supp ≥ minsupp
+                 # join_item_ids = vcat(node_item_ids, sib_item_id)
+                 join_item_ids = zeros(Int16, level)
+                 join_item_ids[1:level-1] = node_item_ids
+                 join_item_ids[end] = sib_item_id
+                 nd = Node4(join_item_ids, join_ti, supp)
+                 push!(node_dict[level][item_idx], nd)
+             end
+        end
+    end
+end
+
+
+"""
+frequent_item_tree4 Board idea + dict
+"""
+function frequent_item_tree4(occ::BitArray{2}, uniq_items::Array{String, 1}, minsupp::Int, maxdepth::Int)
+        
+    level = 1
+    node_dict = Dict{Int16, Vector{Vector{Node4}}}(level=> [Vector{Node4}()])
+    nitems = size(occ, 2)
+    ti = collect(1:size(occ, 1))
+    # This loop creates 1-item nodes (i.e., first children)
+    # If item doesn't have support do not insert
+    for j = 1:nitems
+        node_transacts = view(occ, :, j) #occ[:,j]
+        node_ti = ti[node_transacts] #view(trans_ids, node_transacts)
+        supp = length(node_ti)
+        if supp ≥ minsupp
+            nd = Node4(Int16[j], node_ti, supp)
+            push!(node_dict[level][1], nd)
+        end
+    end
+    
+    nitems_level1 = length(node_dict[1][1]) #Careful! True if root is not added
+    narrays_level1 = length(node_dict[1])
+    
+    # Loop to create the 2-item nodes 
+    # If item doesn't have support insert empty array (to keep children access in dict)
+    level = 2 #level of singles
+    node_dict[level] = Vector{Vector{Node4}}()
+    for item_idx = 1:nitems_level1
+        #transaction ids for this node
+        push!(node_dict[level], Vector{Node4}())
+        node_item_ids = node_dict[level - 1][1][item_idx].item_ids
+        node_ti = node_dict[level - 1][1][item_idx].transact_ids
+        for sib_idx = (item_idx+1):nitems_level1
+            #the item id may not be the same as the sib-idx because level filtered by support
+            sib_item_id = node_dict[level - 1][1][sib_idx].item_ids[end]
+            # pair_transacts = view(occ, node_ti, sib_item_id) #occ[node_ti, sib_item_id]
+            pair_transacts = occ[node_ti, sib_item_id]
+            pair_ti = node_ti[pair_transacts] #view(node_ti, pair_transacts)
+            supp = length(pair_ti)
+            if supp ≥ minsupp
+                # pair_item_ids = vcat(node_item_ids, sib_item_id)
+                pair_item_ids = zeros(Int16, level)
+                pair_item_ids[1:level-1] = node_item_ids
+                pair_item_ids[end] = sib_item_id
+                nd = Node4(pair_item_ids, pair_ti, supp)
+                push!(node_dict[level][item_idx], nd)
+            end
+        end
+    end
+
+    # Grow nodes in breadth-first manner
+    while(level < maxdepth)
+        narrays_prior_level = length(node_dict[level])
+        level = level + 1
+        for kid_array_idx = 1:narrays_prior_level
+            growtree4!(node_dict, occ, kid_array_idx, level, minsupp)
+        end
+    end
+
+    node_dict
+end
+
+
+
+"""
+frequent_item_tree5
+
+Same as f4 but use sparse bool for occ. -- seems pretty bad for memory but doesn't show in allocation tracking
+"""
+function frequent_item_tree5(occ::SparseMatrixCSC{Bool, Int64}, uniq_items::Array{String, 1}, minsupp::Int, maxdepth::Int)
+
+    level = 1
+    node_dict = Dict{Int16, Vector{Vector{Node4}}}(level=> [Vector{Node4}()])
+    nitems = size(occ, 2)
+    # This loop creates 1-item nodes (i.e., first children)
+    # If item doesn't have support do not insert
+    for j = 1:nitems
+        #indeces of non-zero values for the jth column
+        node_ti = occ.rowval[occ.colptr[j]:occ.colptr[j+1]-1]; #view(trans_ids, node_transacts)
+        supp = length(node_ti)
+        if supp ≥ minsupp
+            nd = Node4(Int16[j], node_ti, supp)
+            push!(node_dict[level][1], nd)
+        end
+    end
+    
+    nitems_level1 = length(node_dict[1][1]) #Careful! True if root is not added
+    narrays_level1 = length(node_dict[1])
+    
+    # Loop to create the 2-item nodes 
+    # If item doesn't have support insert empty array (to keep children access in dict)
+    level = 2 #level of singles
+    node_dict[level] = Vector{Vector{Node4}}()
+    for item_idx = 1:nitems_level1
+        #transaction ids for this node
+        push!(node_dict[level], Vector{Node4}())
+        node_item_ids = node_dict[level - 1][1][item_idx].item_ids
+        node_ti = node_dict[level - 1][1][item_idx].transact_ids
+        for sib_idx = (item_idx+1):nitems_level1
+            #the item id may not be the same as the sib-idx because level filtered by support
+            sib_item_id = node_dict[level - 1][1][sib_idx].item_ids[end]
+            pair_transacts = occ[node_ti, sib_item_id]
+            pair_ti = node_ti[pair_transacts] #view(node_ti, pair_transacts)
+            supp = length(pair_ti)
+            if supp ≥ minsupp
+                # pair_item_ids = vcat(node_item_ids, sib_item_id)
+                pair_item_ids = zeros(Int16, level)
+                pair_item_ids[1:level-1] = node_item_ids
+                pair_item_ids[end] = sib_item_id
+                nd = Node4(pair_item_ids, pair_ti, supp)
+                push!(node_dict[level][item_idx], nd)
+            end
+        end
+    end
+    
+    node_dict
+end
