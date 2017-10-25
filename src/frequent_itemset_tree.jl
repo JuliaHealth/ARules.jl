@@ -2,9 +2,6 @@
 # storing and propagating the itemset information at each node
 
 
-using StatsBase
-using DataTables
-
 struct Node
     id::Int16
     item_ids::Array{Int16,1}
