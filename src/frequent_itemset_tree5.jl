@@ -38,13 +38,16 @@ function older_siblings(nd::Node)
 end
 
 
-function support_count(x, y)
+function support_count(x, y, minsupp)
     n = length(x)
     supp = 0
     for i = 1:n
         supp += x[i] & y[i]
         # TODO: consider checking supp at each iteration
         # and then exiting the loop early to save time.
+        if supp ≥ minsupp
+            break
+        end
     end
     supp
 end
@@ -59,10 +62,12 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
     sibs = older_siblings(nd)
 
     for j = 1:length(sibs)
-        supp = support_count(nd.transactions, sibs[j].transactions)
-    
-        if supp ≥ minsupp
+        supp_tmp = support_count(nd.transactions, sibs[j].transactions, minsupp)
+
+        if supp_tmp ≥ minsupp
             transacts = nd.transactions .& sibs[j].transactions
+            supp = sum(transacts)
+
             items = zeros(Int16, k)
             items[1:k-1] = nd.item_ids[1:k-1]
             items[end] = sibs[j].item_ids[end]
