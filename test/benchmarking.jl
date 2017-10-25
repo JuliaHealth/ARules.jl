@@ -5,20 +5,24 @@ using StatsBase
 using BenchmarkTools
 
 itemlist = randstr(10);
-n = 100
-m = 5             # number of items in transactions
+n = 50   #ntransactions
+m = 5   #number of items in transactions
 mx_depth = 3
-minsupp = round(Int, 0.01*n)
+minsupp = round(Int, 0.1*n)
 transactions = [sample(itemlist, m, replace = false) for _ in 1:n];
 uniq_items = unique_items(transactions);
 occ = ARules.occurrence(transactions, uniq_items);
+occ_t = Array(occ');
 
 # warm-up 
-tree = frequent_item_tree(occ, uniq_items, minsupp, mx_depth);
+@time tree = frequent_item_tree(occ, minsupp, mx_depth);
 # tree4 = frequent_item_tree4(occ, uniq_items, minsupp, mx_depth);
-tree6 = ARules.frequent_item_tree6(occ, uniq_items, minsupp, mx_depth);
-tree7 = ARules.frequent_item_tree7(occ, uniq_items, minsupp, mx_depth);
+# @time tree6 = ARules.frequent_item_tree6(occ, minsupp, mx_depth);
+# @time tree7 = ARules.frequent_item_tree7(occ, minsupp, mx_depth);
+@time tree8 = ARules.frequent_item_tree8(occ_t, minsupp, mx_depth);
 
+shownodes(tree)
+shownodes(tree8)
 
 # tree5 = ARules.frequent_item_tree5(occ_sp, uniq_items, minsupp, mx_depth);
 
@@ -26,20 +30,32 @@ tree7 = ARules.frequent_item_tree7(occ, uniq_items, minsupp, mx_depth);
 itemlist = randstr(100);
 n = 100_000
 m = 25           # number of items in transactions
-mx_depth = 3
+mx_depth = 6
 minsupp = round(Int, 0.03*n)
 transactions = [sample(itemlist, m, replace = false) for _ in 1:n];
 uniq_items = unique_items(transactions);
 occ = ARules.occurrence(transactions, uniq_items);
-
+occ_t = Array(occ');
 Profile.clear_malloc_data()
 
-@time tree = frequent_item_tree(occ, uniq_items, minsupp, mx_depth);
+@time tree = frequent_item_tree(occ, minsupp, mx_depth);
 # @time tree4 = frequent_item_tree4(occ, uniq_items, minsupp, mx_depth);
-@time tree6 = ARules.frequent_item_tree6(occ, uniq_items, minsupp, mx_depth);
-@time tree7 = ARules.frequent_item_tree7(occ, uniq_items, minsupp, mx_depth);
+# @time tree6 = ARules.frequent_item_tree6(occ, minsupp, mx_depth);
+# @time tree7 = ARules.frequent_item_tree7(occ, minsupp, mx_depth);
+@time tree8 = ARules.frequent_item_tree8(occ_t, minsupp, mx_depth);
 
-#10 seconds, 2.232 GiB
+
+
+@time ARules.frequent_item_tree7(occ, minsupp, mx_depth);
+Profile.clear_malloc_data()
+@profile ARules.frequent_item_tree8(occ_t, minsupp, mx_depth)
+Profile.print()
+
+
+shownodes(tree)
+shownodes(tree7)
+
+#10 seconds, 2.232 GiBP
 
 
 # occ_sp = sparse(occ);

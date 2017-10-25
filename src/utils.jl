@@ -3,7 +3,19 @@ function shownodes(node::Node, k::Int = 0)
     if has_children(node)
         for nd in node.children 
             print("k = $(k + 1): ")
-            println(nd.item_ids)
+            println("Symbols: ", nd.item_ids, " Support: ", nd.supp)
+        end
+        for nd in node.children
+            shownodes(nd, k+1)
+        end
+    end
+end
+
+function shownodes(node::Node6, k::Int = 0)
+    if has_children(node)
+        for nd in node.children 
+            print("k = $(k + 1): ")
+            println("Symbols: ", nd.item_ids, " Support: ", nd.supp)
         end
         for nd in node.children
             shownodes(nd, k+1)
@@ -18,6 +30,18 @@ function shownodes(node_dict::Dict{Int16, Vector{Vector{Node}}})
         for child_array in chidren_arrays
             for node in child_array
                 println(node.item_ids)
+            end
+        end
+    end
+end
+
+function shownodes(node_dict::Vector{Vector{Vector{Node7}}})
+    
+    for (level, chidren_arrays) in enumerate(node_dict)
+        println("Level = $(level): ")
+        for child_array in chidren_arrays
+            for node in child_array
+                println("Symbols: ", node.item_ids, " Support: ", node.supp)
             end
         end
     end

@@ -150,7 +150,7 @@ The tree is built recursively using calls to the growtree!() function. The
 `minsupp` and `maxdepth` parameters control the minimum support needed for an
 itemset to be called "frequent", and the max depth of the tree, respectively
 """
-function frequent_item_tree(occ::BitArray{2}, uniq_items::Array{String, 1}, minsupp::Int, maxdepth::Int)
+function frequent_item_tree(occ::BitArray{2}, minsupp::Int, maxdepth::Int)
 
     # Have to initialize `itms` array like this because type inference
     # seems to be broken for this otherwise (using v0.6.0)
@@ -159,7 +159,7 @@ function frequent_item_tree(occ::BitArray{2}, uniq_items::Array{String, 1}, mins
     id = Int16(1)
     transacts = BitArray(0)
     root = Node(id, itms, transacts)
-    n_items = length(uniq_items)
+    n_items = size(occ, 2)
 
     # This loop creates 1-item nodes (i.e., first children)
     for j = 1:n_items
@@ -439,13 +439,14 @@ function compute_support(occ::BitArray{2}, item_ids::Vector{Int16})
 
     sum = 0
     res = true           
-    for row=1:size(occ,2)
-        res = true                   
-        for id in item_ids
+    for row=1:size(occ,1)
+        res = true     
+        occ_row = view(occ, :, 1)              
+        @simd for id in item_ids
             @inbounds val= occ[row,id]
             res &= val
         end
-        sum+=res        
+        sum+=res
     end
     sum
 end
@@ -486,7 +487,7 @@ frequent_item_tree6(occurrences, minsupp, maxdepth)
 *Don't store transactions
 *compute the support as loop
 """
-function frequent_item_tree6(occ::BitArray{2}, uniq_items::Array{String, 1}, minsupp::Int, maxdepth::Int)
+function frequent_item_tree6(occ::BitArray{2}, minsupp::Int, maxdepth::Int)
 
     # Have to initialize `itms` array like this because type inference
     # seems to be broken for this otherwise (using v0.6.0)
@@ -495,7 +496,7 @@ function frequent_item_tree6(occ::BitArray{2}, uniq_items::Array{String, 1}, min
     id = Int16(1)
     transacts = BitArray(0)
     root = Node6(id, itms)
-    n_items = length(uniq_items)
+    n_items = size(occ, 2)
 
     # This loop creates 1-item nodes (i.e., first children)
     for j = 1:n_items
@@ -533,16 +534,14 @@ end
 # This function is used internally and is the workhorse of the frequent()
 # function, which generates a frequent itemset tree. The growtree!() function
 # builds up the frequent itemset tree recursively.
-function growtree7!(node_dict::Dict{Int16, Vector{Vector{Node7}}}, occ::BitArray{2}, array_idx::Int, level::Int, minsupp::Int)
+function growtree7!(node_dict::Vector{Vector{Vector{Node7}}}, occ::BitArray{2}, array_idx::Int, level::Int, minsupp::Int)
     
     nitems = length(node_dict[level-1][array_idx]) 
-    node_dict[level] = Vector{Vector{Node7}}()
     for item_idx = 1:nitems
+        push!(node_dict[level], Vector{Node7}())    
         #transaction ids for this node
-        push!(node_dict[level], Vector{Node7}())
         node_item_ids = node_dict[level - 1][array_idx][item_idx].item_ids
-        
-        for sib_idx = item_idx:nitems
+        for sib_idx = item_idx+1:nitems
              sib_item_id = node_dict[level - 1][array_idx][sib_idx].item_ids[end]
              join_item_ids = zeros(Int16, level)
              join_item_ids[1:level-1] = node_item_ids
@@ -550,17 +549,19 @@ function growtree7!(node_dict::Dict{Int16, Vector{Vector{Node7}}}, occ::BitArray
              supp = compute_support(occ, join_item_ids)
              if supp ≥ minsupp
                 nd = Node7(join_item_ids, supp)
-                 push!(node_dict[level][item_idx], nd)
+                push!(node_dict[level][item_idx], nd)
              end
         end
     end
 end
 
 
-function frequent_item_tree7(occ::BitArray{2}, uniq_items::Array{String, 1}, minsupp::Int, maxdepth::Int)
+function frequent_item_tree7(occ::BitArray{2}, minsupp::Int, maxdepth::Int)
     
     level = 1
-    node_dict = Dict{Int16, Vector{Vector{Node7}}}(level=> [Vector{Node7}()])
+    # node_dict = Dict{Int16, Vector{Vector{Node7}}}(level=> [Vector{Node7}()])
+    node_dict = Vector{Vector{Vector{Node7}}}(maxdepth)
+    node_dict[level] = [Vector{Node7}()]  #first level anly contains one vector with all symbols
     nitems = size(occ, 2)
     
     # This loop creates 1-item nodes (i.e., first children)
@@ -575,10 +576,86 @@ function frequent_item_tree7(occ::BitArray{2}, uniq_items::Array{String, 1}, min
 
     # Grow nodes in breadth-first manner
     while(level < maxdepth)
-        narrays_prior_level = length(node_dict[level])
-        level = level + 1
+        level = level + 1        
+        narrays_prior_level = length(node_dict[level-1])
+        node_dict[level] = Vector{Vector{Node7}}()
         for kid_array_idx = 1:narrays_prior_level
             growtree7!(node_dict, occ, kid_array_idx, level, minsupp)
+        end
+    end
+    
+    node_dict
+end
+
+# ------------------------- No recursion - No transacts - OCC transpose
+
+
+function compute_support8(occ::Array{Bool, 2}, item_ids::Vector{Int16})
+    
+        sum = 0
+        res = true   
+        #transactions are columns        
+        for col=1:size(occ,2)
+            res = true     
+            for row in item_ids
+                @inbounds val= occ[row, col]
+                res &= val
+            end
+            sum+=res
+        end
+        sum
+end
+
+# This function is used internally and is the workhorse of the frequent()
+# function, which generates a frequent itemset tree. The growtree!() function
+# builds up the frequent itemset tree recursively.
+function growtree8!(node_dict::Vector{Vector{Vector{Node7}}}, occ::Array{Bool, 2}, array_idx::Int, level::Int, minsupp::Int)
+    
+    nitems = length(node_dict[level-1][array_idx]) 
+    for item_idx = 1:nitems
+        push!(node_dict[level], Vector{Node7}())    
+        #transaction ids for this node
+        node_item_ids = node_dict[level - 1][array_idx][item_idx].item_ids
+        for sib_idx = item_idx+1:nitems
+             sib_item_id = node_dict[level - 1][array_idx][sib_idx].item_ids[end]
+             join_item_ids = zeros(Int16, level)
+             join_item_ids[1:level-1] = node_item_ids
+             join_item_ids[end] = sib_item_id
+             supp = compute_support8(occ, join_item_ids)
+             if supp ≥ minsupp
+                nd = Node7(join_item_ids, supp)
+                push!(node_dict[level][item_idx], nd)
+             end
+        end
+    end
+end
+
+
+function frequent_item_tree8(occ::Array{Bool, 2}, minsupp::Int, maxdepth::Int)
+    
+    level = 1
+    # node_dict = Dict{Int16, Vector{Vector{Node7}}}(level=> [Vector{Node7}()])
+    node_dict = Vector{Vector{Vector{Node7}}}(maxdepth)
+    node_dict[level] = [Vector{Node7}()]  #first level anly contains one vector with all symbols
+    nitems = size(occ, 1)
+    
+    # This loop creates 1-item nodes (i.e., first children)
+    # If item doesn't have support do not insert
+    for j = 1:nitems
+        supp = sum(occ[j, :])
+        if supp ≥ minsupp
+            nd = Node7(Int16[j], supp)
+            push!(node_dict[level][1], nd)
+        end
+    end
+
+    # Grow nodes in breadth-first manner
+    while(level < maxdepth)
+        level = level + 1        
+        narrays_prior_level = length(node_dict[level-1])
+        node_dict[level] = Vector{Vector{Node7}}()
+        for kid_array_idx = 1:narrays_prior_level
+            growtree8!(node_dict, occ, kid_array_idx, level, minsupp)
         end
     end
     
