@@ -14,8 +14,11 @@ uniq_items = unique_items(transactions);
 occ = ARules.occurrence(transactions, uniq_items);
 
 # warm-up 
-# tree = frequent_item_tree(occ, uniq_items, minsupp, mx_depth);
-tree4 = frequent_item_tree4(occ, uniq_items, minsupp, mx_depth);
+tree = frequent_item_tree(occ, uniq_items, minsupp, mx_depth);
+# tree4 = frequent_item_tree4(occ, uniq_items, minsupp, mx_depth);
+tree6 = ARules.frequent_item_tree6(occ, uniq_items, minsupp, mx_depth);
+tree7 = ARules.frequent_item_tree7(occ, uniq_items, minsupp, mx_depth);
+
 
 # tree5 = ARules.frequent_item_tree5(occ_sp, uniq_items, minsupp, mx_depth);
 
@@ -31,8 +34,11 @@ occ = ARules.occurrence(transactions, uniq_items);
 
 Profile.clear_malloc_data()
 
-# @time tree = frequent_item_tree(occ, uniq_items, minsupp, mx_depth);
-@time tree4 = frequent_item_tree4(occ, uniq_items, minsupp, mx_depth);
+@time tree = frequent_item_tree(occ, uniq_items, minsupp, mx_depth);
+# @time tree4 = frequent_item_tree4(occ, uniq_items, minsupp, mx_depth);
+@time tree6 = ARules.frequent_item_tree6(occ, uniq_items, minsupp, mx_depth);
+@time tree7 = ARules.frequent_item_tree7(occ, uniq_items, minsupp, mx_depth);
+
 #10 seconds, 2.232 GiB
 
 
