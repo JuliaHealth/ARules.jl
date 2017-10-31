@@ -93,7 +93,7 @@ function gen_rules(root::Node, supp_dict::Dict{Array{Int16, 1}, Int}, num_transa
 end
 
 
-function rules_to_datatable(rules::Array{Rule, 1}, item_lkup::Dict{Int16, String})
+function rules_to_datatable(rules::Array{Rule, 1}, item_lkup::Dict{T, String}; join_str = ", ") where T <: Integer
     n_rules = length(rules)
     dt = DataTable(lhs = fill("", n_rules),
                    rhs = fill("", n_rules),
@@ -103,7 +103,7 @@ function rules_to_datatable(rules::Array{Rule, 1}, item_lkup::Dict{Int16, String
     for i = 1:n_rules
         lhs_items = map(x -> item_lkup[x], rules[i].p)
 
-        lhs_string = "{" * join(lhs_items, ",") * "}"
+        lhs_string = "{" * join(lhs_items, join_str) * "}"
         dt[i, :lhs] = lhs_string
         dt[i, :rhs] = item_lkup[rules[i].q]
         dt[i, :supp] = rules[i].supp
@@ -139,4 +139,29 @@ function apriori(transactions::Array{Array{String, 1}, 1}; supp::Float64 = 0.01,
     rules = gen_rules(freq_tree, supp_lkup, n, conf)
     rules_dt = rules_to_datatable(rules, item_lkup)
     return rules_dt
+end
+
+
+"""
+apriori(occurrences, item_lkup; supp, conf, maxlen)
+
+Given an boolean occurrence matrix of transactions (rows are transactions, columns are items) and 
+a lookup dictionary of column-index to items-string, this function runs the a-priori
+algorithm for generating frequent item sets. These frequent items are then used to generate
+association rules. The `supp` argument allows us to stipulate the minimum support
+required for an itemset to be considered frequent. The `conf` argument allows us to exclude
+association rules without at least `conf` level of confidence. The `maxlen` argument stipulates
+the maximum length of an association rule (i.e., total items on left- and right-hand sides)
+"""
+function apriori(occurrences::BitArray{2}; supp::Float64 = 0.01, conf = 0.8, maxlen::Int = 5)
+    n = size(occurrences, 1)
+    minsupp = floor(Int, supp * n)
+    if minsupp == 0
+        minsupp = 1
+    end
+    freq_tree = frequent_item_tree(occurrences, minsupp, maxlen)
+    supp_lkup = gen_support_dict(freq_tree, n)
+    rules = gen_rules(freq_tree, supp_lkup, n, conf)
+
+    return rules
 end
