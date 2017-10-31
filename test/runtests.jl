@@ -3,15 +3,12 @@ using StatsBase
 using Base.Test
 
 # write your own tests here
-
-
 itemlist = randstr(100, 16);
 
 n = 100_000
 m = 20               # NOTE: most impactful for runtime complexity (num. items in transactions)
 mx_depth = 10        # max depth of itemset tree (max size of transactions explored)
 t = [sample(itemlist, m, replace = false) for _ in 1:n];
-
 
 unq = unique_items(t);
 @test typeof(unq) == Array{String, 1}
@@ -23,10 +20,6 @@ xtree1 = frequent_item_tree(t, unq, round(Int, 0.01*n), mx_depth);
 @test typeof(xtree1) == Node
 
 rules = apriori(t, supp = 0.01, conf = 0.1, maxlen = mx_depth);
-
-
-
-
 
 t2 = [["a", "b"],
      ["b", "c", "d"],
@@ -79,9 +72,6 @@ xsup3 = gen_support_dict(xtree3, length(a_list))
 
 rules = apriori(a_list, supp = 0.01, conf = 0.01, maxlen = 6)
 
-
-
-
 transactions = [["milk", "eggs", "bread"],
 			    ["butter", "milk", "sugar", "flour", "eggs"],
 			    ["bacon", "eggs", "milk", "beer"],
@@ -94,3 +84,8 @@ freq = frequent(transactions, 1, 8)
 
 rules = apriori(transactions, supp = 0.01, conf = 0.01, maxlen = 6)
 @test size(rules) == (329, 5)
+
+unq = unique_items(transactions);
+occ = occurrence(transactions, unq);
+rules = apriori(occ, supp = 0.01, conf = 0.01, maxlen = 6)
+@test length(rules) == 329
