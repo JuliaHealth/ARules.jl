@@ -88,4 +88,4 @@ rules = apriori(transactions, supp = 0.01, conf = 0.01, maxlen = 6)
 unq = unique_items(transactions);
 occ = occurrence(transactions, unq);
 rules = apriori(occ, supp = 0.01, conf = 0.01, maxlen = 6)
-@test length(rules) == (329)
+@test length(rules) == 329
