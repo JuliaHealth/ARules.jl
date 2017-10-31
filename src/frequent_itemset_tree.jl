@@ -55,7 +55,6 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
             items = zeros(Int16, k)
             items[1:k-1] = nd.item_ids[1:k-1]
             items[end] = sibs[j].item_ids[end]
-
             child = Node(Int16(j), items, transacts, nd, supp)
             push!(nd.children, child)
         end

@@ -30,15 +30,15 @@ shownodes(tree8)
 itemlist = randstr(100);
 n = 100_000
 m = 25           # number of items in transactions
-mx_depth = 6
-minsupp = round(Int, 0.03*n)
+mx_depth = 7
+minsupp = round(Int, 0.01*n)
 transactions = [sample(itemlist, m, replace = false) for _ in 1:n];
 uniq_items = unique_items(transactions);
 occ = ARules.occurrence(transactions, uniq_items);
 occ_t = Array(occ');
 Profile.clear_malloc_data()
 
-@time tree = frequent_item_tree(occ, minsupp, mx_depth);
+@profile tree = frequent_item_tree(occ, minsupp, mx_depth);
 # @time tree4 = frequent_item_tree4(occ, uniq_items, minsupp, mx_depth);
 # @time tree6 = ARules.frequent_item_tree6(occ, minsupp, mx_depth);
 # @time tree7 = ARules.frequent_item_tree7(occ, minsupp, mx_depth);
