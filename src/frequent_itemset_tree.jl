@@ -69,7 +69,7 @@ end
 
 
 
-function unique_items{M}(transactions::Array{Array{M, 1}, 1})
+function unique_items(transactions::Array{Array{M, 1}, 1}) where {M}
     dict = Dict{M, Bool}()
 
     for t in transactions
