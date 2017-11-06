@@ -30,12 +30,19 @@ function has_children(nd::Node)
 end
 
 
+
 function older_siblings(nd::Node)
     n_sibs = length(nd.mother.children)
-    # println("length sibs: ", n_sibs)
-    sib_indcs = map(x -> x.id > nd.id, nd.mother.children)
-    return view(nd.mother.children, sib_indcs)
+    older_indcs = (nd.id + 1):n_sibs
+    return view(nd.mother.children, older_indcs)
 end
+
+# function older_siblings(nd::Node)
+#     n_sibs = length(nd.mother.children)
+#     # println("length sibs: ", n_sibs)
+#     sib_indcs = map(x -> x.id > nd.id, nd.mother.children)
+#     return view(nd.mother.children, sib_indcs)
+# end
 
 
 # This function is used internally and is the workhorse of the frequent()
@@ -226,4 +233,3 @@ function frequent_item_tree(occ::BitArray{2}, minsupp::Int, maxdepth::Int)
     end
     root
 end
-
