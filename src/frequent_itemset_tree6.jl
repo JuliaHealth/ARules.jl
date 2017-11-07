@@ -1,6 +1,6 @@
 # This implements the first attempt at representing
 # transactions as tree where each tree is a transaction.
-
+using StatsBase
 
 struct TNode
     id::Int
@@ -41,7 +41,10 @@ mutable struct INode
 end
 
 
-
+function has_children(tnode)
+    res = length(tnode.children) > 0
+    return res
+end
 
 function tnode_oldersibs(tnode::TNode)
     n_sibs = length(tnode.parent.children)
@@ -50,15 +53,15 @@ function tnode_oldersibs(tnode::TNode)
 end
 
 
-function increment_itemset_supp!(itemset_arr::Array{INode, 1}, items::Array{Int, 1}, itemset_lkup::Dict{UInt64, Int})
+function increment_itemset_supp!(inode_arr::Array{INode, 1}, items::Array{Int, 1}, itemset_lkup::Dict{UInt64, Int})
     hashval = hash(items)
     if haskey(itemset_lkup, hashval)
         idx = itemset_lkup[hashval]
-        itemset_arr[idx].supp += 1
+        inode_arr[idx].supp += 1
     else
         inode = INode(items, 1)
-        push!(itemset_arr, inode)
-        idx = length(itemset_arr)       # length is new index for this itemset
+        push!(inode_arr, inode)
+        idx = length(inode_arr)       # length is new index for this itemset
         hashval = hash(items)
         itemset_lkup[hashval] = idx
     end
@@ -66,36 +69,38 @@ end
 
 
 
-function add_tr_layer!(tnode::TNode, transaction, itemset_arr, itree_lkup, level, maxdepth)
+function grow_tnode_children!(tnode::TNode, transaction, inode_arr, itree_lkup, level)
     # assume sorted transaction with unique items
     # println("level :", level)
     if level == 1
         n_kids = length(transaction)
         for i = 1:n_kids
             node = TNode(i, [transaction[i]], tnode)
-            increment_itemset_supp!(itemset_arr, node.items, itree_lkup)
+            increment_itemset_supp!(inode_arr, node.items, itree_lkup)
             push!(tnode.children, node)
         end
-    elseif 1 < level ≤ maxdepth
+    elseif level > 1
         if level == 2
             first_sib = tnode.id + 1
             n_items = length(transaction)
-            older_sibs = view(transaction, first_sib:n_items)       # NOTE: gets indices of older sibs
+            older_sibs = view(transaction, first_sib:n_items)
         else
             older_sibs = tnode_oldersibs(tnode)
         end
         n_sibs = length(older_sibs)
-
+        # display(older_sibs)
         for i = 1:n_sibs
-            # display(older_sibs)
-            println(i)
-            itemset = vcat(tnode.items, older_sibs[i])
+
+            # println(i)
+            if level == 2
+                itemset = vcat(tnode.items, older_sibs[i])
+            elseif level > 2
+                itemset = vcat(tnode.items, older_sibs[i].items[end])
+            end
             # display(itemset)
             node = TNode(i, itemset, tnode)
-            increment_itemset_supp!(itemset_arr, node.items, itree_lkup)
+            increment_itemset_supp!(inode_arr, node.items, itree_lkup)
             push!(tnode.children, node)
-
-            add_tr_layer!(tnode.parent.children[i], t, itemset_tree, itree_lkup, level, maxdepth)
         end
     end
 end
@@ -106,62 +111,109 @@ troot = TNode(0, Int[])
 iroot = INode(Int[], 100_000_000)
 itemset_tree = [iroot]
 itree_lkup = Dict{UInt64, Int}()
-@time add_tr_layer!(troot, t, itemset_tree, itree_lkup, 1, 2)
-@time add_tr_layer!(troot.children[1], t, itemset_tree, itree_lkup, 2, 2)
+@time grow_tnode_children!(troot, t, itemset_tree, itree_lkup, 1)
+@time grow_tnode_children!(troot.children[1], t, itemset_tree, itree_lkup, 2)
+
+
+function add_tnode_level!(root, transaction, inode_arr, itree_lkup, level)
+    if level == 1
+        grow_tnode_children!(root, transaction, inode_arr, itree_lkup, level)
+    elseif level > 1 && has_children(root)
+        current_layer = length(root.children[1].items)
+        n_kids = length(root.children)
+        if current_layer == (level - 1)
+            for i = 1:n_kids
+                grow_tnode_children!(root.children[i], transaction, inode_arr, itree_lkup, level)
+            end
+        else
+            for i = 1:n_kids
+                add_tnode_level!(root.children[i], transaction, inode_arr, itree_lkup, level)
+            end
+        end
+    end
+end
+
+troot = TNode(0, Int[])
+iroot = INode(Int[], 100_000_000)
+itemset_tree = [iroot]
+itree_lkup = Dict{UInt64, Int}()
+@code_warntype add_tnode_level!(troot, t, itemset_tree, itree_lkup, 1)
+@time add_tnode_level!(troot, t, itemset_tree, itree_lkup, 2)
 
 
 
 
+function grow_tnodes_arr!(transactions, tnode_arr, inode_arr, itree_lkup, level)
+    n = length(tnode_arr)
+    if level == 1
+        for i = 1:n
+            tnode_arr[i] = TNode(0, Int[])
+
+            add_tnode_level!(tnode_arr[i], transactions[i], inode_arr, itree_lkup, level)
+        end
+    elseif level > 1
+        for i = 1:n
+            add_tnode_level!(tnode_arr[i], transactions[i], inode_arr, itree_lkup, level)
+        end
+    end
+end
+
+
+function build_tnode_arr(transactions::Array{Array{Int, 1}, 1}, inode_arr, itree_lkup)
+    n = length(transactions)
+    tnode_arr = Array{TNode, 1}(n)
+    grow_tnodes_arr!(transactions, tnode_arr, inode_arr, itree_lkup, 1)
+    return tnode_arr
+end
+
+
+function frequent_item_tree(transactions, minsupp, maxdepth)
+    itree_lkup = Dict{UInt64, Int}()
+    n = length(transactions)
+    iroot = INode(Int[], n)
+    inode_arr = [iroot]
+    tnode_arr = build_tnode_arr(transactions, inode_arr, itree_lkup)
+    for i = 2:maxdepth
+        grow_tnodes_arr!(transactions, tnode_arr, inode_arr, itree_lkup, i)
+    end
+    return inode_arr
+end
+
+t_arr = [[1, 2, 3, 5, 6], [2, 3, 4, 5], [5, 6]]
+
+@time itree1 = frequent_item_tree(t_arr, 1, 3)
+
+function pprint(itree_arr)
+    n = length(itree_arr)
+    for i = 1:n
+        println("Node: ", itree_arr[i].items, " support: ", itree_arr[i].supp)
+    end
+end
+
+pprint(itree1)
 
 
 
 
+n = 50
+m = 4                # NOTE: most impactful for runtime complexity (num. items in transactions)
+mx_depth = 3        # max depth of itemset tree (max size of transactions explored)
+t_arr = [sample(1:10, m, replace = false) for _ in 1:n];
+t_arr = map(t -> sort!(t), t_arr)
+
+
+@time itree1 = frequent_item_tree(t_arr, 1, mx_depth)
+pprint(itree1)
 
 
 
 
-# function grow_tr_tree!(tnode, transaction, level, maxdepth)
-#     # assume sorted transaction with unique items
-#     println("level :", level)
-#     if level == 1
-#         for i = 1:maxdepth
-#             println(i)
-#             prefix = transaction[i : level]
-#             suffix = transaction[(level + i):end]
-#             kids = Array{TNode, 1}(0)
-#             node = TNode(prefix, suffix, kids)
-#             push!(tr_node.children, node)
-#             grow_tr_tree!(node, transaction, level + 1, maxdepth)
-#         end
-#     elseif level < maxdepth
-#         n_suffixes = length(tr_node.suffix_items)
-#         for i = 1:n_suffixes
-#             println(i)
-#             prefix = transaction[i : level]
-#             suffix = transaction[(level + i):end]
-#             kids = Array{TNode, 1}(0)
-#             node = TNode(prefix, suffix, kids)
-#             push!(tr_node.children, node)
-#             grow_tr_tree!(node, transaction, level + 1, maxdepth)
-#         end
-#     elseif level == maxdepth
-#         n_itemsets = length(tr_node.suffix_items)
-#         # println(tr_node.suffix_items)
-#         res = Array{Array{Int, 1}, 1}(n_itemsets)
-#         for i = 1:n_itemsets
-#             # println("i inner: ", i)
-#             # println(res)
-#             res[i] = vcat(tr_node.prefix_items, tr_node.suffix_items[i])
-#         end
-#         println(res)
-#         return res
-#     end
-# end
-#
-#
-# t = [1, 2, 3, 5, 6]
-#
-# n1 = TNode(Int[], Int[], TNode[])
-#
-# @time grow_tr_tree!(n1, t, 1, 3)
-#
+n = 1000
+m = 12                # NOTE: most impactful for runtime complexity (num. items in transactions)
+mx_depth = 10        # max depth of itemset tree (max size of transactions explored)
+t_arr = [sample(1:100, m, replace = false) for _ in 1:n];
+t_arr = map(t -> sort!(t), t_arr)
+
+
+@time itree2 = frequent_item_tree(t_arr, 1, mx_depth)
+pprint(itree2)
