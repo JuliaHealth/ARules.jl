@@ -44,9 +44,9 @@ end
 
 
 function tnode_oldersibs(tnode::TNode)
-    n_sibs = length(tnode.mother.children)
+    n_sibs = length(tnode.parent.children)
     older_indcs = (tnode.id + 1):n_sibs
-    return view(tnode.mother.children, older_indcs)
+    return view(tnode.parent.children, older_indcs)
 end
 
 
@@ -54,7 +54,7 @@ function increment_itemset_supp!(itemset_arr::Array{INode, 1}, items::Array{Int,
     hashval = hash(items)
     if haskey(itemset_lkup, hashval)
         idx = itemset_lkup[hashval]
-        itemsset_arr[idx].supp += 1
+        itemset_arr[idx].supp += 1
     else
         inode = INode(items, 1)
         push!(itemset_arr, inode)
@@ -66,16 +66,36 @@ end
 
 
 
-function grow_tr_tree!(tnode::TNode, transaction, itemset_arr, level, maxdepth)
+function add_tr_layer!(tnode::TNode, transaction, itemset_arr, itree_lkup, level, maxdepth)
     # assume sorted transaction with unique items
-    println("level :", level)
-    itree_lkup = Dict{UInt64, Int}()
+    # println("level :", level)
     if level == 1
         n_kids = length(transaction)
         for i = 1:n_kids
             node = TNode(i, [transaction[i]], tnode)
             increment_itemset_supp!(itemset_arr, node.items, itree_lkup)
             push!(tnode.children, node)
+        end
+    elseif 1 < level ≤ maxdepth
+        if level == 2
+            first_sib = tnode.id + 1
+            n_items = length(transaction)
+            older_sibs = view(transaction, first_sib:n_items)       # NOTE: gets indices of older sibs
+        else
+            older_sibs = tnode_oldersibs(tnode)
+        end
+        n_sibs = length(older_sibs)
+
+        for i = 1:n_sibs
+            # display(older_sibs)
+            println(i)
+            itemset = vcat(tnode.items, older_sibs[i])
+            # display(itemset)
+            node = TNode(i, itemset, tnode)
+            increment_itemset_supp!(itemset_arr, node.items, itree_lkup)
+            push!(tnode.children, node)
+
+            add_tr_layer!(tnode.parent.children[i], t, itemset_tree, itree_lkup, level, maxdepth)
         end
     end
 end
@@ -85,7 +105,9 @@ t = [1, 2, 3, 5, 6]
 troot = TNode(0, Int[])
 iroot = INode(Int[], 100_000_000)
 itemset_tree = [iroot]
-grow_tr_tree!(troot, t, itemset_tree, 1, 7)
+itree_lkup = Dict{UInt64, Int}()
+@time add_tr_layer!(troot, t, itemset_tree, itree_lkup, 1, 2)
+@time add_tr_layer!(troot.children[1], t, itemset_tree, itree_lkup, 2, 2)
 
 
 
