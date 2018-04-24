@@ -1,5 +1,5 @@
 module ARules
-using DataTables
+using DataFrames
 
 export Node, Rule, apriori, frequent, unique_items, shownodes,
        # these below are for pilotting

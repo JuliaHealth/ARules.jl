@@ -141,9 +141,9 @@ function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items
 end
 
 
-function suppdict_to_datatable(supp_lkup, item_lkup)
+function suppdict_to_dataframe(supp_lkup, item_lkup)
     n_sets = length(supp_lkup)
-    dt = DataTable(itemset = fill("", n_sets),
+    dt = DataFrame(itemset = fill("", n_sets),
                    supp = zeros(Int, n_sets))
     i = 1
 
@@ -188,7 +188,7 @@ function frequent(transactions::Array{Array{String, 1}, 1}, minsupp::T, maxdepth
 
     supp_lkup = gen_support_dict(freq_tree, n)
 
-    freq = suppdict_to_datatable(supp_lkup, item_lkup)
+    freq = suppdict_to_dataframe(supp_lkup, item_lkup)
     return freq
 end
 
