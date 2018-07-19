@@ -165,8 +165,8 @@ end
     frequent()
 This function just acts as a bit of a convenience function that returns the frequent
 item sets and their support count (integer) when given and array of transactions. It
-basically just wraps frequent_item_tree() but gives back the plain text of the items, rather than
-that Int16 representation.
+basically just wraps frequent_item_tree() but gives back the plain text of the items,
+rather than that Int16 representation.
 """
 function frequent(transactions::Array{Array{String, 1}, 1}, minsupp::T, maxdepth) where T <: Real
     n = length(transactions)
