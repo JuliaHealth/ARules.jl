@@ -93,9 +93,9 @@ function gen_rules(root::Node, supp_dict::Dict{Array{Int16, 1}, Int}, num_transa
 end
 
 
-function rules_to_datatable(rules::Array{Rule, 1}, item_lkup::Dict{T, String}; join_str = ", ") where T <: Integer
+function rules_to_dataframe(rules::Array{Rule, 1}, item_lkup::Dict{T, String}; join_str = ", ") where T <: Integer
     n_rules = length(rules)
-    dt = DataTable(lhs = fill("", n_rules),
+    dt = DataFrame(lhs = fill("", n_rules),
                    rhs = fill("", n_rules),
                    supp = zeros(n_rules),
                    conf = zeros(n_rules),
@@ -137,7 +137,7 @@ function apriori(transactions::Array{Array{String, 1}, 1}; supp::Float64 = 0.01,
     freq_tree = frequent_item_tree(transactions, uniq_items, minsupp, maxlen)
     supp_lkup = gen_support_dict(freq_tree, n)
     rules = gen_rules(freq_tree, supp_lkup, n, conf)
-    rules_dt = rules_to_datatable(rules, item_lkup)
+    rules_dt = rules_to_dataframe(rules, item_lkup)
     return rules_dt
 end
 
