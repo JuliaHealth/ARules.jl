@@ -5,15 +5,15 @@ using BenchmarkTools
 
 const itemlist = randstr(100);
 
-const n = 100_000
+n = 100_000
 const m = 25             # number of items in transactions
 const mx_depth = 7
-const t = [sample(itemlist, m, replace = false) for _ in 1:n];
+t = [sample(itemlist, m, replace = false) for _ in 1:n];
 
 # @code_warntype _frequent(t, 1)
 const unq2 = unique_items(t)
 # @benchmark occ2 = occurrence(t, unq2)
-itree2 = frequent_item_tree(t, unq2, round(Int, 0.01*n), mx_depth)
+@time itree2 = frequent_item_tree(t, unq2, round(Int, 0.01*n), mx_depth);
 
 Profile.clear_malloc_data()
 itree2 = frequent_item_tree(t, unq2, round(Int, 0.01*n), mx_depth)
