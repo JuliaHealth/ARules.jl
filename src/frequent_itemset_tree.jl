@@ -62,7 +62,6 @@ function growtree!(nd::Node, minsupp, k, maxdepth)
     maxdepth -= 1
     if maxdepth > 1
         for kid in nd.children
-            # println("running kid: ", kid.item_ids)
             growtree!(kid, minsupp, k+1, maxdepth)
         end
     end
@@ -143,18 +142,17 @@ end
 
 function suppdict_to_dataframe(supp_lkup, item_lkup)
     n_sets = length(supp_lkup)
-    dt = DataFrame(itemset = fill("", n_sets),
-                   supp = zeros(Int, n_sets))
+    df = DataFrame(itemset = fill("", n_sets), supp = zeros(Int, n_sets))
     i = 1
 
     for (k, v) in supp_lkup
         item_names = map(x -> item_lkup[x], k)
         itemset_string = "{" * join(item_names, ",") * "}"
-        dt[i, :itemset] = itemset_string
-        dt[i, :supp] = v
+        df[i, :itemset] = itemset_string
+        df[i, :supp] = v
         i += 1
     end
-    dt
+    df
 end
 
 
@@ -221,7 +219,7 @@ function frequent_item_tree(occ::BitArray{2}, minsupp::Int, maxdepth::Int)
     end
     n_kids = length(root.children)
 
-    # Grow nodes in breadth-first manner
+    # Grow nodes in depth-first manner
     for j = 1:n_kids
         growtree!(root.children[j], minsupp, 2, maxdepth)
     end
