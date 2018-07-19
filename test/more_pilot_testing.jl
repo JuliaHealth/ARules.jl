@@ -8,17 +8,19 @@ transactions = [["milk", "eggs", "bread"],
 			    ["cheese", "ham", "bread", "ketchup"],
 			    ["mustard", "hot dogs", "buns", "hamburger", "cheese", "beer"]]
 
-freq = frequent(transactions, 1, 8)
-display(freq)
-
-for x in freq[:itemset]
-    println(x)
-end
+# freq = frequent(transactions, 1, 8)
+# display(freq)
+#
+# for x in freq[:itemset]
+#     println(x)
+# end
 
 unq = unique_items(transactions)
 
-node = ARules.frequent_item_tree(transactions, unq, 1, 8)
+@time node = ARules.frequent_item_tree(transactions, unq, 1, 8)
+
 sup = gen_support_dict(node, 9)
+
 
 for k in keys(sup)
     println(k)

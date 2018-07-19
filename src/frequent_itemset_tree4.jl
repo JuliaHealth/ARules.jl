@@ -13,7 +13,7 @@ struct Node
     supp::Int
     transactions::BitArray{1}  # only for single-item nodes
 
-    function Node(id::Int16, item_ids::Array{Int16,1}, transactions::Array{Int, 1})
+    function Node(id::Int16, item_ids::Array{Int16,1}, transactions::BitArray{Int, 1})
         transact_ids = find(transactions)
         children = Array{Node, 1}(0)
         nd = new(id, item_ids, transact_ids, children)
