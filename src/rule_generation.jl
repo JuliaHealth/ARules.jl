@@ -93,7 +93,7 @@ function gen_rules(root::Node, supp_dict::Dict{Array{Int16, 1}, Int}, num_transa
 end
 
 
-function rules_to_dataframe(rules::Array{Rule, 1}, item_lkup::Dict{T, String}; join_str = ", ") where T <: Integer
+function rules_to_dataframe(rules::Array{Rule, 1}, item_lkup::Dict{T, String}; join_str = " | ") where T <: Integer
     n_rules = length(rules)
     dt = DataFrame(lhs = fill("", n_rules),
                    rhs = fill("", n_rules),
