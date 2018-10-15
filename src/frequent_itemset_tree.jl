@@ -147,7 +147,7 @@ function suppdict_to_dataframe(supp_lkup, item_lkup)
 
     for (k, v) in supp_lkup
         item_names = map(x -> item_lkup[x], k)
-        itemset_string = "{" * join(item_names, ",") * "}"
+        itemset_string = "{" * join(item_names, " | ") * "}"
         df[i, :itemset] = itemset_string
         df[i, :supp] = v
         i += 1
