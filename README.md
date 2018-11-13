@@ -1,10 +1,9 @@
 # ARules
 
 [![Build Status](https://travis-ci.org/bcbi/ARules.jl.svg?branch=master)](https://travis-ci.org/bcbi/ARules.jl)
-
 [![Coverage Status](https://coveralls.io/repos/bcbi/ARules.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/bcbi/ARules.jl?branch=master)
-
 [![codecov.io](http://codecov.io/github/bcbi/ARules.jl/coverage.svg?branch=master)](http://codecov.io/github/bcbi/ARules.jl?branch=master)
+[![DOI](https://zenodo.org/badge/95671564.svg)](https://zenodo.org/badge/latestdoi/95671564)
 
 ## 1. Installation
 ```julia
