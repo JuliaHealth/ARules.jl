@@ -1,7 +1,7 @@
 using ARules
 using StatsBase
 
-If VERSION < v"0.7.0-DEV.1263"
+if VERSION < v"0.7.0"
 	using Base.Test
 else
 	using Test
