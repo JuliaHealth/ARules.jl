@@ -40,7 +40,7 @@ end
 # rules for that node. This does not include rules for the node's children.
 function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num_transacts, minconf)
     lhs_keep = trues(k)
-    rules = Array{Rule, 1}(0)
+    rules = Array{Rule, 1}(undef, 0)
     for i = 1:k
         lhs_keep[i] = false
         if i > 1
@@ -82,7 +82,7 @@ end
 
 
 function gen_rules(root::Node, supp_dict::Dict{Array{Int16, 1}, Int}, num_transacts, minconf)
-    rules = Array{Rule, 1}(0)
+    rules = Array{Rule, 1}(undef, 0)
     n_kids = length(root.children)
     if n_kids > 0
         for i = 1:n_kids
