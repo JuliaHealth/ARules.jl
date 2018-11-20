@@ -1,11 +1,6 @@
 using ARules
 using StatsBase
-
-if VERSION < v"0.7.0"
-	using Base.Test
-else
-	using Test
-end
+using Test
 
 # write your own tests here
 itemlist = randstr(100, 16);
