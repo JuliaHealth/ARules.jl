@@ -11,13 +11,13 @@ struct Node
     supp::Int
 
     function Node(id::Int16, item_ids::Array{Int16,1}, transactions::BitArray{1})
-        children = Array{Node,1}(0)
+        children = Array{Node,1}(undef, 0)
         nd = new(id, item_ids, transactions, children)
         return nd
     end
 
     function Node(id::Int16, item_ids::Array{Int16,1}, transactions::BitArray{1}, mother::Node, supp::Int)
-        children = Array{Node,1}(0)
+        children = Array{Node,1}(undef, 0)
         nd = new(id, item_ids, transactions, children, mother, supp)
         return nd
     end
@@ -115,10 +115,10 @@ function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items
 
     # Have to initialize `itms` array like this because type inference
     # seems to be broken for this otherwise (using v0.6.0)
-    itms = Array{Int16,1}(1)
+    itms = Array{Int16,1}(undef, 1)
     itms[1] = -1
     id = Int16(1)
-    transacts = BitArray(0)
+    transacts = BitArray(undef, 0)
     root = Node(id, itms, transacts)
     n_items = length(uniq_items)
 
@@ -202,10 +202,10 @@ function frequent_item_tree(occ::BitArray{2}, minsupp::Int, maxdepth::Int)
 
     # Have to initialize `itms` array like this because type inference
     # seems to be broken for this otherwise (using v0.6.0)
-    itms = Array{Int16,1}(1)
+    itms = Array{Int16,1}(undef, 1)
     itms[1] = -1
     id = Int16(1)
-    transacts = BitArray(0)
+    transacts = BitArray(undef, 0)
     root = Node(id, itms, transacts)
     n_items = size(occ, 2)
 

@@ -20,7 +20,7 @@ function randstr(n::Int, len::Int = 16)
     upper = map(uppercase, vals)
     append!(vals, upper)
     append!(vals, map(string, 0:9))
-    res = Array{String,1}(n)
+    res = Array{String,1}(undef, n)
     for i = 1:n
         res[i] = join(rand(vals, len))
     end

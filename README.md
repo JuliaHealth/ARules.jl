@@ -7,7 +7,7 @@
 
 ## 1. Installation
 ```julia
-julia> Pkg.clone("https://github.com/bcbi/ARules.jl")
+Pkg> add https://github.com/bcbi/ARules.jl
 ```
 
 ## 2. Frequent Itemset Generation
