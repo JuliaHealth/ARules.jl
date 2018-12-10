@@ -1,13 +1,10 @@
 # ARules
 
-[![Build Status](https://travis-ci.org/bcbi/ARules.jl.svg?branch=master)](https://travis-ci.org/bcbi/ARules.jl)
-[![Coverage Status](https://coveralls.io/repos/bcbi/ARules.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/bcbi/ARules.jl?branch=master)
-[![codecov.io](http://codecov.io/github/bcbi/ARules.jl/coverage.svg?branch=master)](http://codecov.io/github/bcbi/ARules.jl?branch=master)
-[![DOI](https://zenodo.org/badge/95671564.svg)](https://zenodo.org/badge/latestdoi/95671564)
+[![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://bcbi.github.io/ARules.jl/latest) [![Build Status](https://travis-ci.org/bcbi/ARules.jl.svg?branch=master)](https://travis-ci.org/bcbi/ARules.jl) [![codecov.io](http://codecov.io/github/bcbi/ARules.jl/coverage.svg?branch=master)](http://codecov.io/github/bcbi/ARules.jl?branch=master) [![DOI](https://zenodo.org/badge/95671564.svg)](https://zenodo.org/badge/latestdoi/95671564)
 
 ## 1. Installation
 ```julia
-Pkg> add https://github.com/bcbi/ARules.jl
+julia> Pkg.add("https://github.com/bcbi/ARules.jl")
 ```
 
 ## 2. Frequent Itemset Generation
@@ -52,7 +49,7 @@ julia> rules = apriori(transactions, supp = 0.01, conf = 0.1, maxlen = 6)
 
 
 ## 4. Note
-This package is under active development. And as such, there are still many performance and feature improvements to be made. In the case of performance, while the package will handle many applications quite well, once the number of "items" in "transactions" becomes large, there is a marked performance penalty. 
+This package is under active development. And as such, there are still many performance and feature improvements to be made. In the case of performance, while the package will handle many applications quite well, once the number of "items" in "transactions" becomes large, there is a marked performance penalty.
 
 ## 5. To Do
 - Implement additional frequent-itemset generation algorithms (e.g., eclat, fp-growth)
