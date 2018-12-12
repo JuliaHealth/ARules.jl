@@ -39,10 +39,9 @@ end
 # Given a single node in a frequent item tree, this function generates all the
 # rules for that node. This does not include rules for the node's children.
 function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num_transacts, minconf)
-    lhs_keep = trues(k)
+    lhs_keep = falses(k)
     rules = Array{Rule, 1}(undef, 0)
     for i = 1:k
-        lhs_keep[i] = false
         if i > 1
             lhs_keep[i-1] = true
         end
@@ -64,7 +63,8 @@ function gen_node_rules(node::Node, supp_dict::Dict{Array{Int16,1}, Int}, k, num
             end
         end
     end
-    rules
+
+    return rules
 end
 
 
@@ -145,7 +145,7 @@ end
 """
 apriori(occurrences, item_lkup; supp, conf, maxlen)
 
-Given an boolean occurrence matrix of transactions (rows are transactions, columns are items) and 
+Given an boolean occurrence matrix of transactions (rows are transactions, columns are items) and
 a lookup dictionary of column-index to items-string, this function runs the a-priori
 algorithm for generating frequent item sets. These frequent items are then used to generate
 association rules. The `supp` argument allows us to stipulate the minimum support
