@@ -16,7 +16,7 @@ function randtree(n::Int; len::Int = 12, seed::Int = 100)
     return res
 end
 
-bm_tree = randtree(1000);
+bm_tree = randtree(200);
 
 tree = frequent_item_tree(bm_tree,4,10);
 

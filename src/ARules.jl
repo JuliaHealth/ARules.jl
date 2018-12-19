@@ -11,4 +11,6 @@ include("frequent_itemset_tree.jl")
 include("utils.jl")
 include("rule_generation.jl")
 
+include("reference_implementations.jl")
+
 end # module
