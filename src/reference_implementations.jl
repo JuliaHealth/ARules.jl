@@ -2,23 +2,23 @@
 # Python reference implementation
 # http://adrem.ua.ac.be/~goethals/software/files/eclat.py
 
-function eclat!(prefix::Vector{T}, items::Vector{Pair{T,Vector{Int}}}, minsupp::Int, sets::Vector{Pair{Tuple,Int}}, maxlen::Int) where T
-    item_supp = minsupp
-    while length(items) > 0 && item_supp >= minsupp && length(items[1]) < maxlen
+function eclat!(prefix::Vector{T}, items::Vector{Pair{T,Set{Int}}}, minsupp::Int, sets::Vector{Pair{Vector{T},Int}}, maxlen::Int) where T
+    while length(items) > 0  && length(items[1][1]) < maxlen
         item, tx_ids = popfirst!(items)
-        item_supp = length(tx_ids)
-        if item_supp >= minsupp
-            suffix = Array{Pair{T,Array{Int,1}},1}()
+        if length(tx_ids) >= minsupp
+            suffix = Vector{Pair{T,Set{Int}}}()
             for (oitem, otx_ids) in items
                 new_tx_ids = intersect(tx_ids, otx_ids)
                 supp = length(new_tx_ids)
                 if supp >= minsupp
-                    push!(sets, (prefix..., item, oitem) => supp)
+                    push!(sets, [prefix..., item, oitem] => supp)
                     push!(suffix, (oitem => new_tx_ids))
                 end
             end
-            suffix_sorted = sort(collect(suffix), rev=true, by=x->length(x[2]))
-            eclat!(vcat(prefix, [item]), suffix_sorted, minsupp, sets, maxlen)
+            sort!(suffix, rev=true, by=x->length(x[2]))
+            eclat!(vcat(prefix, [item]), suffix, minsupp, sets, maxlen)
+        else
+            break
         end
     end
 
@@ -26,23 +26,25 @@ function eclat!(prefix::Vector{T}, items::Vector{Pair{T,Vector{Int}}}, minsupp::
 end
 
 function eclat_start(transactions::Vector{Vector{T}}, minsupp::Int, maxlen::Int) where T
-    data = Dict{T,Vector{Int}}()
-    sets = Vector{Pair{Tuple,Int}}()
+    data = Dict{T,Set{Int}}()
+    sets = Vector{Pair{Vector{T},Int}}()
 
     for i = 1:length(transactions)
         for item in transactions[i]
             if !haskey(data,item)
-                data[item] = [i]
+                data[item] = Set([i])
             else
                 push!(data[item], i)
             end
         end
     end
 
-    data_pairs = sort(filter(x->length(x[2]) >= minsupp, collect(data)), rev=true, by=x->length(x[2]))
+    data_pairs = collect(data)
+    sort!(filter!(x->length(x[2]) >= minsupp, data_pairs), rev=true, by = x->length(x[2]))
 
-    append!(sets, map(x -> (x[1],) => length(x[2]), data_pairs))
+    append!(sets, map(x -> [x[1]] => length(x[2]), data_pairs))
 
+    # return sets
     eclat!(Vector{T}(), data_pairs, minsupp, sets, maxlen)
 
     return sets
@@ -152,7 +154,7 @@ function apriori!(txs::Vector{Vector{T}}, curr_itemset::Dict{NTuple{N,T},Int}, m
     # find supports for all the candidate sets
     k_sets_counts = Dict{NTuple{N+1,T},Int}()
 
-    isempty(C_k) && return k_sets_counts
+    isempty(C_k) && return nothing
 
     for (row, tx) in enumerate(txs)
         # if we've excluded this row, skip it
