@@ -57,7 +57,15 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "documentation/#ARules.apriori-Tuple{Array{Array{String,1},1}}",
+    "location": "documentation/#ARules.apriori-Tuple{BitArray{2}}",
+    "page": "API",
+    "title": "ARules.apriori",
+    "category": "method",
+    "text": "apriori(occurrences, item_lkup; supp, conf, maxlen)\n\nGiven an boolean occurrence matrix of transactions (rows are transactions, columns are items) and a lookup dictionary of column-index to items-string, this function runs the a-priori algorithm for generating frequent item sets. These frequent items are then used to generate association rules. The supp argument allows us to stipulate the minimum support required for an itemset to be considered frequent. The conf argument allows us to exclude association rules without at least conf level of confidence. The maxlen argument stipulates the maximum length of an association rule (i.e., total items on left- and right-hand sides)\n\n\n\n\n\n"
+},
+
+{
+    "location": "documentation/#ARules.apriori-Union{Tuple{Array{Array{S,1},1}}, Tuple{S}} where S",
     "page": "API",
     "title": "ARules.apriori",
     "category": "method",
@@ -65,27 +73,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "documentation/#ARules.apriori-Tuple{BitArray{2}}",
-    "page": "API",
-    "title": "ARules.apriori",
-    "category": "method",
-    "text": "apriori(occurrences, item_lkup; supp, conf, maxlen)\n\nGiven an boolean occurrence matrix of transactions (rows are transactions, columns are items) and  a lookup dictionary of column-index to items-string, this function runs the a-priori algorithm for generating frequent item sets. These frequent items are then used to generate association rules. The supp argument allows us to stipulate the minimum support required for an itemset to be considered frequent. The conf argument allows us to exclude association rules without at least conf level of confidence. The maxlen argument stipulates the maximum length of an association rule (i.e., total items on left- and right-hand sides)\n\n\n\n\n\n"
-},
-
-{
-    "location": "documentation/#ARules.frequent-Union{Tuple{T}, Tuple{Array{Array{String,1},1},T,Any}} where T<:Real",
+    "location": "documentation/#ARules.frequent-Union{Tuple{S}, Tuple{T}, Tuple{Array{Array{S,1},1},T,Any}} where S where T<:Real",
     "page": "API",
     "title": "ARules.frequent",
     "category": "method",
     "text": "frequent()\n\nThis function just acts as a bit of a convenience function that returns the frequent item sets and their support count (integer) when given and array of transactions. It basically just wraps frequentitemtree() but gives back the plain text of the items, rather than that Int16 representation.\n\n\n\n\n\n"
-},
-
-{
-    "location": "documentation/#ARules.frequent_item_tree-Tuple{Array{Array{String,1},1},Array{String,1},Int64,Int64}",
-    "page": "API",
-    "title": "ARules.frequent_item_tree",
-    "category": "method",
-    "text": "frequent_item_tree(transactions, minsupp, maxdepth)\n\nThis function creates a frequent itemset tree from an array of transactions. The tree is built recursively using calls to the growtree!() function. The minsupp and maxdepth parameters control the minimum support needed for an itemset to be called \"frequent\", and the max depth of the tree, respectively\n\n\n\n\n\n"
 },
 
 {
@@ -94,6 +86,14 @@ var documenterSearchIndex = {"docs": [
     "title": "ARules.frequent_item_tree",
     "category": "method",
     "text": "frequentitemtree(occurrences, minsupp, maxdepth)\n\nThis function creates a frequent itemset tree from an occurrence matrix. The tree is built recursively using calls to the growtree!() function. The minsupp and maxdepth parameters control the minimum support needed for an itemset to be called \"frequent\", and the max depth of the tree, respectively\n\n\n\n\n\n"
+},
+
+{
+    "location": "documentation/#ARules.frequent_item_tree-Union{Tuple{S}, Tuple{Array{Array{S,1},1},Array{S,1},Int64,Int64}} where S",
+    "page": "API",
+    "title": "ARules.frequent_item_tree",
+    "category": "method",
+    "text": "frequent_item_tree(transactions, minsupp, maxdepth)\n\nThis function creates a frequent itemset tree from an array of transactions. The tree is built recursively using calls to the growtree!() function. The minsupp and maxdepth parameters control the minimum support needed for an itemset to be called \"frequent\", and the max depth of the tree, respectively\n\n\n\n\n\n"
 },
 
 {
