@@ -85,7 +85,7 @@ end
 
 # This function is used internally by the frequent() function to create the
 # initial bitarrays used to represent the first "children" in the itemset tree.
-function occurrence(transactions::Array{Array{String, 1}, 1}, uniq_items::Array{String, 1})
+function occurrence(transactions::Array{Array{S, 1}, 1}, uniq_items::Array{S, 1}) where S
     n = length(transactions)
     p = length(uniq_items)
 
@@ -110,7 +110,7 @@ The tree is built recursively using calls to the growtree!() function. The
 `minsupp` and `maxdepth` parameters control the minimum support needed for an
 itemset to be called "frequent", and the max depth of the tree, respectively
 """
-function frequent_item_tree(transactions::Array{Array{String, 1}, 1}, uniq_items::Array{String, 1}, minsupp::Int, maxdepth::Int)
+function frequent_item_tree(transactions::Array{Array{S, 1}, 1}, uniq_items::Array{S, 1}, minsupp::Int, maxdepth::Int) where S
     occ = occurrence(transactions, uniq_items)
 
     # Have to initialize `itms` array like this because type inference
@@ -166,10 +166,10 @@ item sets and their support count (integer) when given and array of transactions
 basically just wraps frequent_item_tree() but gives back the plain text of the items,
 rather than that Int16 representation.
 """
-function frequent(transactions::Array{Array{String, 1}, 1}, minsupp::T, maxdepth) where T <: Real
+function frequent(transactions::Array{Array{S, 1}, 1}, minsupp::T, maxdepth) where {T <: Real, S}
     n = length(transactions)
     uniq_items = unique_items(transactions)
-    item_lkup = Dict{Int16, String}()
+    item_lkup = Dict{Int16, S}()
     for (i, itm) in enumerate(uniq_items)
         item_lkup[i] = itm
     end

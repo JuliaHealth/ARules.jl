@@ -93,7 +93,7 @@ function gen_rules(root::Node, supp_dict::Dict{Array{Int16, 1}, Int}, num_transa
 end
 
 
-function rules_to_dataframe(rules::Array{Rule, 1}, item_lkup::Dict{T, String}; join_str = " | ") where T <: Integer
+function rules_to_dataframe(rules::Array{Rule, 1}, item_lkup::Dict{T, S}; join_str = " | ") where {T <: Integer, S}
     n_rules = length(rules)
     dt = DataFrame(lhs = fill("", n_rules),
                    rhs = fill("", n_rules),
@@ -101,11 +101,11 @@ function rules_to_dataframe(rules::Array{Rule, 1}, item_lkup::Dict{T, String}; j
                    conf = zeros(n_rules),
                    lift = zeros(n_rules))
     for i = 1:n_rules
-        lhs_items = map(x -> item_lkup[x], rules[i].p)
+        lhs_items = map(x -> string.(item_lkup[x]), rules[i].p)
 
         lhs_string = "{" * join(lhs_items, join_str) * "}"
         dt[i, :lhs] = lhs_string
-        dt[i, :rhs] = item_lkup[rules[i].q]
+        dt[i, :rhs] = string.(item_lkup[rules[i].q])
         dt[i, :supp] = rules[i].supp
         dt[i, :conf] = rules[i].conf
         dt[i, :lift] = rules[i].lift
@@ -123,10 +123,10 @@ required for an itemset to be considered frequent. The `conf` argument allows us
 association rules without at least `conf` level of confidence. The `maxlen` argument stipulates
 the maximum length of an association rule (i.e., total items on left- and right-hand sides)
 """
-function apriori(transactions::Array{Array{String, 1}, 1}; supp::Float64 = 0.01, conf = 0.8, maxlen::Int = 5)
+function apriori(transactions::Array{Array{S, 1}, 1}; supp::Float64 = 0.01, conf = 0.8, maxlen::Int = 5) where S
     n = length(transactions)
     uniq_items = unique_items(transactions)
-    item_lkup = Dict{Int16, String}()
+    item_lkup = Dict{Int16, S}()
     for (i, itm) in enumerate(uniq_items)
         item_lkup[i] = itm
     end
@@ -145,7 +145,7 @@ end
 """
 apriori(occurrences, item_lkup; supp, conf, maxlen)
 
-Given an boolean occurrence matrix of transactions (rows are transactions, columns are items) and 
+Given an boolean occurrence matrix of transactions (rows are transactions, columns are items) and
 a lookup dictionary of column-index to items-string, this function runs the a-priori
 algorithm for generating frequent item sets. These frequent items are then used to generate
 association rules. The `supp` argument allows us to stipulate the minimum support

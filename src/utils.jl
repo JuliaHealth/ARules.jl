@@ -1,7 +1,7 @@
 
 function shownodes(node::Node, k::Int = 0)
     if has_children(node)
-        for nd in node.children 
+        for nd in node.children
             print("k = $(k + 1): ")
             println(nd.item_ids)
         end
@@ -11,11 +11,8 @@ function shownodes(node::Node, k::Int = 0)
     end
 end
 
-
-
-
 function randstr(n::Int, len::Int = 16)
-    vals = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
+    vals = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
             "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
     upper = map(uppercase, vals)
     append!(vals, upper)
