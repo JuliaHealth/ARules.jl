@@ -1,7 +1,7 @@
 name = "ARules"
 uuid = "7cbe2057-1070-5a1a-9a20-8e476bfa53e1"
 authors = ["Brown Center for Biomedical Informatics"]
-version = "0.0.1"
+version = "0.0.2"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
