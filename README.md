@@ -1,6 +1,6 @@
 # ARules
 
-[![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://bcbi.github.io/ARules.jl/latest) [![Build Status](https://travis-ci.org/bcbi/ARules.jl.svg?branch=master)](https://travis-ci.org/bcbi/ARules.jl) [![codecov.io](http://codecov.io/github/bcbi/ARules.jl/coverage.svg?branch=master)](http://codecov.io/github/bcbi/ARules.jl?branch=master) [![DOI](https://zenodo.org/badge/95671564.svg)](https://zenodo.org/badge/latestdoi/95671564)
+[![Docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliahealth.org/ARules.jl/stable) [![Build Status](https://travis-ci.org/JuliaHealth/ARules.jl.svg?branch=master)](https://travis-ci.org/JuliaHealth/ARules.jl) [![codecov.io](http://codecov.io/github/JuliaHealth/ARules.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaHealth/ARules.jl?branch=master) [![DOI](https://zenodo.org/badge/95671564.svg)](https://zenodo.org/badge/latestdoi/95671564)
 
 ## 1. Installation
 ```julia
